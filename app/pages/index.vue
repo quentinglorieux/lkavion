@@ -1,5 +1,5 @@
 <template>
-  <div>Hello World</div>
+  <ClimateForm />
 </template>
 
 <script setup></script>
