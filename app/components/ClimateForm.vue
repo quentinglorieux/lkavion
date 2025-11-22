@@ -3,9 +3,11 @@ import CityAutocomplete from '@/components/CityAutocomplete.vue'
 import { useTravelSaver } from '@/composables/useTravelSaver'
 import { geodesicDistance } from '@/composables/useDistanceCalculator'
 import { useAuth } from '@/composables/useAuth'
+import { useI18n } from '@/composables/useI18n'
 
 const { user } = useAuth()
 const { saveTravel } = useTravelSaver()
+const { t } = useI18n()
 
 // Default city object for Paris (pre-filled to allow immediate calculations)
 const defaultParis = { name: 'Paris, France', lat: '48.8566', lng: '2.3522', countryCode: 'FR' }
@@ -165,41 +167,38 @@ async function saveAll() {
     <div class="bg-gray-100 border border-gray-300 p-4 rounded-md flex items-start gap-4">
       <div class="text-blue-500 text-xl">ℹ️</div>
       <div class="text-sm">
-        <p class="font-semibold">Simulateur de vos déplacements professionnels</p>
-        <p>
-          Veuillez saisir la ville de départ, de destination ainsi que le mode de déplacement pour chaque étape de votre voyage, l'une après l'autre.
-          Les calculs sont réalisés avec la méthode GES 1point5.
-        </p>
+        <p class="font-semibold">{{ t('climateForm.infoTitle') }}</p>
+        <p>{{ t('climateForm.infoBody') }}</p>
       </div>
     </div>
 
     <!-- Totals Panel -->
     <div class="grid md:grid-cols-4 gap-6 items-stretch">
       <div class="bg-white shadow-md rounded-lg p-4 border text-center flex flex-col justify-center">
-        <div class="text-sm text-gray-600 uppercase">Distance Totale</div>
+        <div class="text-sm text-gray-600 uppercase">{{ t('climateForm.totals.distanceTitle') }}</div>
         <div class="text-3xl mt-1 text-gray-700 italic">{{ totalDistance }} km</div>
-        <div v-if="globalRoundTrip && totalDistance" class="text-[11px] text-gray-400 mt-1">(Aller simple total ≈ {{ Math.round(totalDistance/2) }} km)</div>
+        <div v-if="globalRoundTrip && totalDistance" class="text-[11px] text-gray-400 mt-1">{{ t('climateForm.totals.oneWayPrefixDistance') }} {{ Math.round(totalDistance/2) }} km</div>
       </div>
       <div class="bg-white shadow-md rounded-lg p-4 border text-center flex flex-col justify-center">
-        <div class="text-sm text-gray-600 uppercase">CO₂ Total</div>
+        <div class="text-sm text-gray-600 uppercase">{{ t('climateForm.totals.co2Title') }}</div>
         <div class="text-3xl mt-1 text-gray-700 italic">{{ totalCO2 }} kg</div>
-        <div v-if="globalRoundTrip && totalCO2" class="text-[11px] text-gray-400 mt-1">(Aller simple total ≈ {{ Math.round(totalCO2/2) }} kg)</div>
+        <div v-if="globalRoundTrip && totalCO2" class="text-[11px] text-gray-400 mt-1">{{ t('climateForm.totals.oneWayPrefixCO2') }} {{ Math.round(totalCO2/2) }} kg</div>
       </div>
       <div class="bg-white shadow-md rounded-lg p-4 border flex flex-col justify-center items-center gap-2">
-        <label class="text-sm font-medium text-gray-700">Aller-Retour Global</label>
+        <label class="text-sm font-medium text-gray-700">{{ t('climateForm.roundTrip.label') }}</label>
         <button type="button" @click="globalRoundTrip = !globalRoundTrip"
           class="px-4 py-2 rounded-md text-sm font-medium border transition"
           :class="globalRoundTrip ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-indigo-50 border-indigo-300 hover:bg-indigo-100'">
-          {{ globalRoundTrip ? 'Oui' : 'Non' }}
+          {{ globalRoundTrip ? t('climateForm.roundTrip.yes') : t('climateForm.roundTrip.no') }}
         </button>
-        <p class="text-[11px] text-gray-500 text-center">Double toutes les distances & CO₂.</p>
+        <p class="text-[11px] text-gray-500 text-center">{{ t('climateForm.roundTrip.hint') }}</p>
       </div>
       <div class="bg-white shadow-md rounded-lg p-4 border flex flex-col justify-center items-center gap-2 relative">
-        <p class="text-xs text-gray-500 text-center">Ajouter des liaisons.</p>
+        <p class="text-xs text-gray-500 text-center">{{ t('climateForm.actions.addLegLabel') }}</p>
         <button type="button" @click="addLeg" :disabled="!canAddLeg"
           class="px-4 py-2 rounded-md text-sm font-medium border transition"
           :class="canAddLeg ? 'bg-indigo-50 border-indigo-300 hover:bg-indigo-100' : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'">
-          ➕ Ajouter
+          {{ t('climateForm.actions.addLegButton') }}
         </button>
       </div>
     </div>
@@ -211,19 +210,19 @@ async function saveAll() {
           {{ leg.id }}
         </div>
         <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
-          <h3 class="text-lg font-semibold">Liaison {{ leg.id }}</h3>
+          <h3 class="text-lg font-semibold">{{ t('climateForm.legLabel') }} {{ leg.id }}</h3>
           <div class="flex items-center gap-3">
-            <button v-if="legs.length > 1" @click="removeLeg(leg.id)" class="text-xs text-red-600 hover:underline">Retirer</button>
+            <button v-if="legs.length > 1" @click="removeLeg(leg.id)" class="text-xs text-red-600 hover:underline">{{ t('climateForm.history.remove') }}</button>
             <button v-if="leg.id === legs.length" @click="addLeg" :disabled="!canAddLeg"
               class="text-xs px-3 py-1 rounded-md border transition relative"
               :class="canAddLeg ? 'bg-indigo-50 border-indigo-300 hover:bg-indigo-100' : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'">
-              ➕ Ajouter
+              {{ t('climateForm.actions.addLegButton') }}
             </button>
           </div>
         </div>
         <div class="grid md:grid-cols-5 gap-6 mb-4">
           <div class="md:col-span-1">
-            <label class="block mb-1 text-sm font-medium text-gray-700">Mode *</label>
+            <label class="block mb-1 text-sm font-medium text-gray-700">{{ t('climateForm.history.modeLabel') }}</label>
             <select v-model="leg.mode" class="w-full border border-gray-300 rounded-md px-3 py-4.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option>Avion</option>
               <option>Train</option>
@@ -245,14 +244,14 @@ async function saveAll() {
         </div>
         <div class="grid md:grid-cols-2 gap-6 mt-2">
           <div class="border rounded-md p-3 bg-gray-50">
-            <div class="text-[11px] uppercase text-gray-500">Distance</div>
+            <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.distanceTitle') }}</div>
             <div class="text-base font-semibold">{{ (legMetrics.find(m=>m.id===leg.id)?.distance) ?? '...' }} km</div>
-            <div v-if="globalRoundTrip && legMetrics.find(m=>m.id===leg.id)?.rawDist" class="text-[10px] text-gray-400">Aller simple: {{ legMetrics.find(m=>m.id===leg.id)?.rawDist }} km</div>
+            <div v-if="globalRoundTrip && legMetrics.find(m=>m.id===leg.id)?.rawDist" class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{ legMetrics.find(m=>m.id===leg.id)?.rawDist }} km</div>
           </div>
           <div class="border rounded-md p-3 bg-gray-50">
-            <div class="text-[11px] uppercase text-gray-500">CO₂</div>
+            <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.co2Title') }}</div>
             <div class="text-base font-semibold">{{ (legMetrics.find(m=>m.id===leg.id)?.co2) ?? '...' }} kg</div>
-            <div v-if="globalRoundTrip && legMetrics.find(m=>m.id===leg.id)?.rawCO2" class="text-[10px] text-gray-400">Aller simple: {{ legMetrics.find(m=>m.id===leg.id)?.rawCO2 }} kg</div>
+            <div v-if="globalRoundTrip && legMetrics.find(m=>m.id===leg.id)?.rawCO2" class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{ legMetrics.find(m=>m.id===leg.id)?.rawCO2 }} kg</div>
           </div>
         </div>
       </div>
@@ -266,7 +265,7 @@ async function saveAll() {
         class="px-6 py-3 rounded-md shadow font-medium transition flex items-center gap-2"
         :class="(canSave && !saving) ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
       >
-        <span v-if="!saving">💾 Enregistrer toutes les liaisons ({{ legs.length }})</span>
+        <span v-if="!saving">{{ t('climateForm.actions.saveButton') }} ({{ legs.length }})</span>
         <span v-else class="flex items-center gap-2">
           <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
           Sauvegarde...

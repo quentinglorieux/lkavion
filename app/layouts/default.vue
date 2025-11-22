@@ -1,29 +1,40 @@
-<script setup>
+<script setup lang="ts">
+import { computed } from 'vue'
 import LoginModal from '@/components/LoginModal.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useI18n } from '@/composables/useI18n'
 
 const { user, logout } = useAuth()
-const showLogin = ref(false)
+const showLogin = useState('loginModalOpen', () => false)
+const { t, locale, switchLocale, availableLocales } = useI18n()
+
+const localeModel = computed({
+  get: () => locale.value,
+  set: (val: string) => switchLocale(val)
+})
 </script>
 
 <template>
   <div>
-    <header class="flex justify-between items-center p-4 border-b">
+    <header class="flex flex-wrap gap-4 justify-between items-center p-4 border-b">
       <div class="font-bold text-lg">🌍 LKB Flights Calculator</div>
-      <nav class="space-x-4">
-         <router-link to="/" class="text-sm text-gray-600 hover:text-blue-600">Home</router-link>
-        <router-link to="/calculator" class="text-sm text-gray-600 hover:text-blue-600">Calculator</router-link>
-        <router-link v-if="user" to="/dashboard" class="text-sm text-gray-600 hover:text-blue-600">Dashboard</router-link>
+      <nav class="flex items-center gap-4 flex-wrap text-sm text-gray-600">
+        <NuxtLink to="/" class="hover:text-blue-600">{{ t('nav.home') }}</NuxtLink>
+        <NuxtLink to="/calculator" class="hover:text-blue-600">{{ t('nav.calculator') }}</NuxtLink>
+        <NuxtLink v-if="user" to="/dashboard" class="hover:text-blue-600">{{ t('nav.dashboard') }}</NuxtLink>
       </nav>
-      <div>
-        
-  
+      <div class="flex items-center gap-4">
+        <select v-model="localeModel" class="text-sm border rounded-md px-2 py-1">
+          <option v-for="code in availableLocales" :key="code" :value="code">
+            {{ code.toUpperCase() }}
+          </option>
+        </select>
         <template v-if="user">
-          Bonjour {{ user.data.first_name }}
-          <button @click="logout" class="ml-2 text-sm text-red-600">Log out</button>
+          <span class="text-sm text-gray-700">{{ t('auth.greeting') }} {{ user.data.first_name }}</span>
+          <button @click="logout" class="ml-2 text-sm text-red-600">{{ t('nav.logout') }}</button>
         </template>
         <template v-else>
-          <button @click="showLogin = true" class="text-sm text-blue-600 hover:underline">Log in</button>
+          <button @click="showLogin = true" class="text-sm text-blue-600 hover:underline">{{ t('nav.login') }}</button>
         </template>
       </div>
     </header>
