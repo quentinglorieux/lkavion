@@ -6,40 +6,29 @@ export function useAuth() {
     maxAge: 60 * 60 * 24 * 30,
   }); // optional
   const user = useState("user", () => null);
+  const { directusFetch, base } = useDirectus()
 
-  const login = async (identifier, password) => {
+  const login = async (email, password) => {
     try {
-      const res = await $fetch("http://localhost:8055/auth/login/ldap", {
-        method: "POST",
-        body: { identifier, password},
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      token.value = res.data.access_token;
-      refreshToken.value = res.data.refresh_token;
-        // console.log('Sending token:', token.value)
-
-
-      // 🔥 NOW fetch the user:
-      const userRes = await $fetch("/api/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      });
-
-      user.value = userRes;
-      // console.log("User data:", user.value);
-
-      return { success: true };
+      const res = await $fetch('/api/auth/login', {
+        method: 'POST',
+        body: { email, password }
+      })
+      token.value = res.data.access_token
+      refreshToken.value = res.data.refresh_token
+      const userRes = await $fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token.value}` }
+      })
+      user.value = userRes
+      return { success: true }
     } catch (err) {
-      console.error("Login error:", err);
+      console.error('Login error:', err)
       return {
         success: false,
-        message: err.data?.errors?.[0]?.message || "Erreur inconnue",
-      };
+        message: err.statusMessage || err.data?.errors?.[0]?.message || 'Échec de connexion'
+      }
     }
-  };
+  }
 
   const logout = () => {
     token.value = null;

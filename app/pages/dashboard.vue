@@ -4,9 +4,10 @@ import { useTravelSummary } from '@/composables/useTravelSummary'
 import TravelSummaryTable from '@/components/TravelSummaryTable.vue'
 
 const { fetchSummary, travels, totals, summaryTableData, pending } = useTravelSummary()
-
-
-onMounted(fetchSummary)
+const { token } = useAuth()
+if (token.value) {
+  await useAsyncData('travelSummary', () => fetchSummary())
+}
 </script>
 
 <template>

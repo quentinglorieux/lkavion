@@ -18,5 +18,12 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/scripts',
     '@nuxt/ui'
-  ]
+  ],
+
+  runtimeConfig: {
+    directusUrl: process.env.DIRECTUS_URL || 'http://localhost:8055',
+    public: {
+      directusUrl: process.env.DIRECTUS_URL || 'http://localhost:8055'
+    }
+  }
 })

@@ -2,17 +2,30 @@
 import { useCitySearch } from '@/composables/useCitySearch'
 const props = defineProps({
   label: String,
-  modelValue: Object
+  modelValue: {
+    type: [Object, String],
+    default: null
+  },
+  size: {
+    type: String,
+    default: 'md' // 'md' | 'lg'
+  }
 })
 const emit = defineEmits(['update:modelValue'])
 
-const inputValue = ref('') // <— UI field value
+const inputValue = ref('')
 const search = useCitySearch()
 
-// Watch user typing
+// Sync input when modelValue changes (initial + external updates)
+watch(() => props.modelValue, (val) => {
+  if (!val) return
+  inputValue.value = typeof val === 'object' ? val.name : val
+}, { immediate: true })
+
+// User typing triggers search
 watch(inputValue, (val) => {
-  if (!val || (props.modelValue && val === props.modelValue.name)) {
-    // If user clears or selects a value
+  const currentName = typeof props.modelValue === 'object' && props.modelValue ? props.modelValue.name : props.modelValue
+  if (!val || (currentName && val === currentName)) {
     search.results = []
   } else {
     search.query = val
@@ -30,12 +43,15 @@ function selectCity(city) {
   <div class="relative w-full">
     <label class="block mb-1 text-sm font-medium text-gray-700">{{ label }}</label>
     <div class="relative">
-      <input
-        v-model="inputValue"
-        type="text"
-        placeholder="Rechercher une ville"
-        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+            <input
+              v-model="inputValue"
+              type="text"
+              placeholder="Rechercher une ville"
+              :class="[
+                'w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500',
+                size === 'lg' ? 'px-4 py-3 text-lg' : 'px-3 py-2'
+              ]"
+            />
     </div>
 
     <!-- Autocomplete Dropdown -->

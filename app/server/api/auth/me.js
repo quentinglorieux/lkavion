@@ -9,13 +9,18 @@ export default defineEventHandler(async (event) => {
 
   const token = raw.replace('Bearer ', '')
   // console.log('Token:', token)
+  const base = process.env.DIRECTUS_URL || 'http://localhost:8055'
   try {
-    const user = await $fetch('http://localhost:8055/users/me', {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 8000)
+    const user = await $fetch(base + '/users/me', {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}` 
-      }
+      },
+      signal: controller.signal
     })
+    clearTimeout(timer)
     // console.log('User data:', user)
     return user
   } catch (err) {

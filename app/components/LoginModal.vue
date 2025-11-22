@@ -8,8 +8,8 @@
         <div class="space-y-4">
           <input
             v-model="identifier"
-            type="identifier"
-            placeholder="Identifiant"
+            type="email"
+            placeholder="Email"
             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none"
           />
           <input

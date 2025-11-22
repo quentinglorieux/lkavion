@@ -12,16 +12,23 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Step 1: Get user ID from /users/me
-    const user = await $fetch('http://localhost:8055/users/me', {
+    const base = process.env.DIRECTUS_URL || 'http://localhost:8055'
+    const controllerUser = new AbortController()
+    const timerUser = setTimeout(() => controllerUser.abort(), 8000)
+    const user = await $fetch(base + '/users/me', {
       headers: {
         Authorization: `Bearer ${token}`
-      }
+      },
+      signal: controllerUser.signal
     })
+    clearTimeout(timerUser)
 
     const userId = user.data.id
 
     // Step 2: Get flights for this user
-    const flights = await $fetch('http://localhost:8055/items/flights', {
+    const controllerFlights = new AbortController()
+    const timerFlights = setTimeout(() => controllerFlights.abort(), 8000)
+    const flights = await $fetch(base + '/items/flights', {
       headers: {
         Authorization: `Bearer ${token}`
       },
@@ -32,8 +39,10 @@ export default defineEventHandler(async (event) => {
           }
         },
         fields: 'distance,co2,transport_mode,departure,final'
-      }
+      },
+      signal: controllerFlights.signal
     })
+    clearTimeout(timerFlights)
 
     return flights.data || []
 

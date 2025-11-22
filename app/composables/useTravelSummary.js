@@ -3,6 +3,7 @@ export function useTravelSummary() {
 
   const travels = ref([])
   const pending = ref(true)
+  const error = ref(null)
 
   const totals = reactive({
     totalDistance: 0,
@@ -14,6 +15,7 @@ export function useTravelSummary() {
 
   async function fetchSummary() {
     pending.value = true
+    error.value = null
     try {
       const res = await $fetch('/api/travels/me', {
         headers: {
@@ -54,6 +56,7 @@ export function useTravelSummary() {
       }))
     } catch (err) {
       console.error('Error loading travel summary:', err)
+      error.value = err
     } finally {
       pending.value = false
     }
@@ -64,6 +67,7 @@ export function useTravelSummary() {
     totals,
     summaryTableData,
     fetchSummary,
-    pending
+    pending,
+    error
   }
 }
