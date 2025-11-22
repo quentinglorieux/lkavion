@@ -17,7 +17,7 @@ const localeModel = computed({
 <template>
   <div>
     <header class="flex flex-wrap gap-4 justify-between items-center p-4 border-b">
-      <div class="font-bold text-lg">🌍 LKB Flights Calculator</div>
+      <div class="font-bold text-lg">🌍 {{ t('home.title') }} - {{ t('home.version') }}</div>
       <nav class="flex items-center gap-4 flex-wrap text-sm text-gray-600">
         <NuxtLink to="/" class="hover:text-blue-600">{{ t('nav.home') }}</NuxtLink>
         <NuxtLink to="/calculator" class="hover:text-blue-600">{{ t('nav.calculator') }}</NuxtLink>
