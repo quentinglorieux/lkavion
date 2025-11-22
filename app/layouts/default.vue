@@ -11,9 +11,10 @@ const showLogin = ref(false)
     <header class="flex justify-between items-center p-4 border-b">
       <div class="font-bold text-lg">🌍 LKB Flights Calculator</div>
       <nav class="space-x-4">
-        <router-link to="/" class="text-sm text-gray-600 hover:text-blue-600">Calculator</router-link>
-        <router-link to="/dashboard" class="text-sm text-gray-600 hover:text-blue-600">Dashboard</router-link>
-        </nav>
+         <router-link to="/" class="text-sm text-gray-600 hover:text-blue-600">Home</router-link>
+        <router-link to="/calculator" class="text-sm text-gray-600 hover:text-blue-600">Calculator</router-link>
+        <router-link v-if="user" to="/dashboard" class="text-sm text-gray-600 hover:text-blue-600">Dashboard</router-link>
+      </nav>
       <div>
         
   

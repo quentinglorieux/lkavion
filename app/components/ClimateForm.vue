@@ -2,6 +2,7 @@
 import CityAutocomplete from '@/components/CityAutocomplete.vue'
 import { useTravelSaver } from '@/composables/useTravelSaver'
 import { geodesicDistance } from '@/composables/useDistanceCalculator'
+import { useAuth } from '@/composables/useAuth'
 
 const { user } = useAuth()
 const { saveTravel } = useTravelSaver()
@@ -22,11 +23,14 @@ function computeRawDistance(leg) {
   const from = leg.from
   const to = leg.to
   if (!from || !to || typeof from !== 'object' || typeof to !== 'object') return null
+  // Support both lng and lon just in case search source changes
+  const fromLon = parseFloat(from.lng ?? from.lon)
+  const toLon = parseFloat(to.lng ?? to.lon)
   let dist = geodesicDistance(
     parseFloat(from.lat),
-    parseFloat(from.lng),
+    fromLon,
     parseFloat(to.lat),
-    parseFloat(to.lng)
+    toLon
   )
   if (leg.mode === 'Avion') {
     dist += 95
@@ -64,6 +68,19 @@ function computeCO2(leg, distance) {
   return Math.round(distance * factor)
 }
 
+function generateTripUuid() {
+  const cryptoApi = globalThis?.crypto
+  if (cryptoApi?.randomUUID) {
+    return cryptoApi.randomUUID()
+  }
+  const template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+  return template.replace(/[xy]/g, (char) => {
+    const r = Math.floor(Math.random() * 16)
+    const v = char === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+
 // Reactive maps for metrics
 const legMetrics = computed(() => {
   return legs.value.map(l => {
@@ -77,6 +94,12 @@ const legMetrics = computed(() => {
 
 const totalDistance = computed(() => legMetrics.value.reduce((sum, m) => sum + (m.distance || 0), 0))
 const totalCO2 = computed(() => legMetrics.value.reduce((sum, m) => sum + (m.co2 || 0), 0))
+
+// Can save if logged in and at least one leg has valid metrics
+const canSave = computed(() => {
+  if (!user.value) return false
+  return legMetrics.value.some(m => m.distance && m.co2)
+})
 
 function addLeg() {
   const last = legs.value[legs.value.length - 1]
@@ -98,19 +121,39 @@ const canAddLeg = computed(() => {
   return typeof last.from === 'object' && typeof last.to === 'object'
 })
 
+const saving = ref(false)
+
 async function saveAll() {
-  if (!user.value) return
+  if (!user.value || saving.value) return
+  saving.value = true
+  let successCount = 0
+  let failCount = 0
+  const tripUuid = generateTripUuid()
   for (const leg of legs.value) {
     const metrics = legMetrics.value.find(m => m.id === leg.id)
     if (!metrics?.distance || !metrics?.co2) continue
-    await saveTravel({
+    const result = await saveTravel({
       traveler: user.value?.data.id || '',
       departure: leg.from?.name || '',
       final: leg.to?.name || '',
       distanceKm: metrics.distance,
       co2EmissionKg: metrics.co2,
       transport_mode: leg.mode + (globalRoundTrip.value ? ' (Aller-Retour)' : ''),
-    })
+      tripUuid,
+      allerRetour: globalRoundTrip.value
+    }, { silent: true })
+    if (result.ok) successCount++
+    else failCount++
+  }
+  saving.value = false
+  if (successCount && !failCount) {
+    alert(`${successCount} liaison(s) sauvegardée(s) avec succès 🚀`)
+  } else if (successCount && failCount) {
+    alert(`${successCount} sauvegardée(s), ${failCount} échec(s) ⚠️`)
+  } else if (!successCount && failCount) {
+    alert(`Aucune liaison sauvegardée. ${failCount} échec(s) 😢`)
+  } else {
+    alert('Rien à sauvegarder.')
   }
 }
 </script>
@@ -181,7 +224,7 @@ async function saveAll() {
         <div class="grid md:grid-cols-5 gap-6 mb-4">
           <div class="md:col-span-1">
             <label class="block mb-1 text-sm font-medium text-gray-700">Mode *</label>
-            <select v-model="leg.mode" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select v-model="leg.mode" class="w-full border border-gray-300 rounded-md px-3 py-4.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option>Avion</option>
               <option>Train</option>
               <option>RER</option>
@@ -216,15 +259,20 @@ async function saveAll() {
     </div>
 
     <!-- Save All Button -->
-    <div class="flex justify-end mt-8">
+    <div class="flex justify-end mt-8" v-if="user">
       <button
-        :disabled="!user || totalDistance === 0"
+        :disabled="!canSave || saving"
         @click="saveAll"
-        class="px-6 py-3 rounded-md shadow font-medium transition"
-        :class="(user && totalDistance>0) ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
+        class="px-6 py-3 rounded-md shadow font-medium transition flex items-center gap-2"
+        :class="(canSave && !saving) ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
       >
-        💾 Enregistrer toutes les liaisons ({{ legs.length }})
+        <span v-if="!saving">💾 Enregistrer toutes les liaisons ({{ legs.length }})</span>
+        <span v-else class="flex items-center gap-2">
+          <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+          Sauvegarde...
+        </span>
       </button>
     </div>
+    <div v-else class="text-right text-sm text-gray-500">Connectez-vous pour enregistrer vos liaisons.</div>
   </div>
 </template>
