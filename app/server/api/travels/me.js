@@ -9,6 +9,14 @@ export default defineEventHandler(async (event) => {
   }
 
   const token = raw.replace('Bearer ', '')
+  const serviceToken = process.env.DIRECTUS_API_TOKEN
+  if (!serviceToken) {
+    console.error('Missing DIRECTUS_API_TOKEN environment variable')
+    return sendError(event, createError({
+      statusCode: 500,
+      statusMessage: 'Service token missing'
+    }))
+  }
 
   try {
     // Step 1: Get user ID from /users/me
@@ -25,12 +33,12 @@ export default defineEventHandler(async (event) => {
 
     const userId = user.data.id
 
-    // Step 2: Get flights for this user
-    const controllerFlights = new AbortController()
-    const timerFlights = setTimeout(() => controllerFlights.abort(), 8000)
-    const flights = await $fetch(base + '/items/flights', {
+    // Step 2: Get travels for this user
+    const controllerTravels = new AbortController()
+    const timerTravels = setTimeout(() => controllerTravels.abort(), 8000)
+    const travels = await $fetch(base + '/items/travels', {
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${serviceToken}`
       },
       params: {
         filter: {
@@ -40,17 +48,17 @@ export default defineEventHandler(async (event) => {
         },
         fields: 'distance,co2,transport_mode,departure,final'
       },
-      signal: controllerFlights.signal
+      signal: controllerTravels.signal
     })
-    clearTimeout(timerFlights)
+    clearTimeout(timerTravels)
 
-    return flights.data || []
+    return travels.data || []
 
   } catch (err) {
-    console.error('Error fetching user flights:', err)
+    console.error('Error fetching user travels:', err)
     return sendError(event, createError({
       statusCode: 500,
-      statusMessage: 'Failed to fetch flights',
+      statusMessage: 'Failed to fetch travels',
       data: err.data || null
     }))
   }

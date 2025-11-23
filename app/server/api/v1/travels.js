@@ -1,19 +1,25 @@
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const base = process.env.DIRECTUS_URL || 'http://localhost:8055'
-  const token = getHeader(event, 'authorization')
+  const userToken = getHeader(event, 'authorization')
+  const serviceToken = process.env.DIRECTUS_API_TOKEN
 
-  if (!token) {
+  if (!userToken) {
     return sendError(event, createError({ statusCode: 401, statusMessage: 'Unauthorized' }))
+  }
+
+  if (!serviceToken) {
+    console.error('Missing DIRECTUS_API_TOKEN environment variable')
+    return sendError(event, createError({ statusCode: 500, statusMessage: 'Service token missing' }))
   }
 
   try {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 8000)
-    const res = await $fetch(`${base}/items/flights`, {
+    const res = await $fetch(`${base}/items/travels`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${serviceToken}`,
         'Content-Type': 'application/json'
       },
       body,

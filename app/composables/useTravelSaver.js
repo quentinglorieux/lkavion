@@ -20,7 +20,7 @@ export function useTravelSaver() {
         body.aller_retour = allerRetour
       }
 
-      const { error } = await useFetch('/api/v1/flights', {
+      const { error } = await useFetch('/api/v1/travels', {
         method: 'POST',
         body,
         headers: {
@@ -30,15 +30,15 @@ export function useTravelSaver() {
 
       if (error.value) {
         console.error('Erreur de sauvegarde:', error.value)
-        if (!silent) alert('Erreur lors de la sauvegarde 😢')
+        if (!silent) alert('Erreur lors de la sauvegarde')
         return { ok: false, error: error.value }
       } else {
-        if (!silent) alert('Déplacement sauvegardé avec succès 🚀')
+        if (!silent) alert('Déplacement sauvegardé avec succès')
         return { ok: true }
       }
     } catch (err) {
       console.error('Erreur réseau ou fetch:', err)
-      if (!silent) alert('Échec de la requête 😢')
+      if (!silent) alert('Échec de la requête')
       return { ok: false, error: err }
     }
   }
