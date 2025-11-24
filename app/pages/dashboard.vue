@@ -18,10 +18,14 @@ if (token.value) {
 const tripCount = computed(() => travels.value.length)
 const averageDistance = computed(() => tripCount.value ? Math.round(totals.totalDistance / tripCount.value) : 0)
 const averageCO2 = computed(() => tripCount.value ? Math.round(totals.totalCO2 / tripCount.value) : 0)
+const totalTrainCost = computed(() => {
+  const train = summaryTableData.value.find(r => r.transport_mode === 'Train')
+  return train?.price ? Number(train.price) : 0
+})
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto py-10 space-y-8 px-3  ">
+  <div class="max-w-7xl mx-auto py-10 space-y-8 px-3  ">
     <header class="space-y-2">
       <p class="text-sm text-gray-500 uppercase tracking-wide">{{ t('dashboard.hero.label') }}</p>
       <h1 class="text-3xl font-bold">{{ t('dashboard.hero.title') }}</h1>
@@ -47,9 +51,9 @@ const averageCO2 = computed(() => tripCount.value ? Math.round(totals.totalCO2 /
         <span class="text-xs text-gray-500 mt-1">{{ t('dashboard.cards.avgCO2Prefix') }} {{ averageCO2 }} {{ t('dashboard.cards.kgPerTrip') }}</span>
       </div>
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
-        <span class="text-xs uppercase tracking-widest text-gray-400">{{ t('dashboard.cards.modesTitle') }}</span>
-        <strong class="mt-2 text-3xl">{{ summaryTableData.length }}</strong>
-        <span class="text-xs text-gray-500 mt-1">{{ t('dashboard.cards.modesHint') }}</span>
+        <span class="text-xs uppercase tracking-widest text-gray-400">Coût total Train</span>
+        <strong class="mt-2 text-3xl">€{{ totalTrainCost.toFixed(2) }}</strong>
+        <span class="text-xs text-gray-500 mt-1">Somme des prix saisis</span>
       </div>
     </section>
 

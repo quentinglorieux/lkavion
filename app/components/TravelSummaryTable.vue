@@ -39,28 +39,23 @@ const columns = [
   },
   {
     accessorKey: 'count',
-    header: 'Nombre de trajets',
+    header: 'Trajet',
     cell: ({ row }) => `${row.original.count ?? 'nan'}`
 
   },
   {
-    id: 'cost',
-    header: 'Coût estimé (€)',
+    accessorKey: 'price',
+    header: 'Coût (€)',
     cell: ({ row }) => {
-      const co2 = row.getValue('co2') || 0
-      const tons = co2 / 1000
-      let cost = 0
-      if (tons > 2) {
-        cost = 1000 * 1 + (tons - 2) * 1000 * 2
-      } else if (tons > 1) {
-        cost = 1000 * 1
-      }
-      return h('span', { class: 'font-medium text-right' }, `${cost.toFixed(0)} €`)
+      const mode = row.getValue('transport_mode')
+      const price = row.getValue('price') || 0
+      // Show actual aggregated price for Train, otherwise em dash.
+      return h('span', { class: 'font-medium text-right' }, mode === 'Train' && price > 0 ? `${price.toFixed(2)} €` : '—')
     }
   }
 ]
 </script>
 
 <template>
-  <UTable :data="data" :columns="columns" sticky class="max-w-2xl w-full" />
+  <UTable :data="data" :columns="columns" sticky class="max-w-3xl w-full" />
 </template>

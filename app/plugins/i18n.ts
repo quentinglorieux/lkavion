@@ -12,7 +12,7 @@ const messages = {
     },
     home: {
       title: 'LKB Calculateur de CO2',
-      version: 'v1.0',
+      version: 'v1.1',
       description: "Bienvenue sur l'outil interne de calcul des distances et émissions carbone liées à vos déplacements professionnels. Utilisez le calculateur pour saisir chaque liaison et obtenir une estimation selon la méthodologie GES 1point5. Les données enregistrées alimentent ensuite votre tableau de bord personnel.",
       cards: {
         loginTitle: 'Se connecter',
@@ -53,7 +53,8 @@ const messages = {
         distanceTitle: 'Distance',
         co2Title: 'CO₂',
         oneWayLegend: 'Aller simple:',
-        saveButton: '💾 Enregistrer toutes les liaisons'
+        saveButton: '💾 Enregistrer toutes les liaisons',
+        priceTitle: 'Coût (€)',
       },
       legLabel: 'Liaison',
       history: {
@@ -102,7 +103,7 @@ const messages = {
     },
     home: {
       title: 'LKB CO2 Calculator',
-      version: 'v1.0',
+      version: 'v1.1',
       description: 'Welcome to the internal tool used to estimate distances and carbon emissions for your business trips. Use the calculator to input each leg and get an estimate based on the GES 1point5 methodology. Saved data powers your personal dashboard.',
       cards: {
         loginTitle: 'Log in',
@@ -143,7 +144,8 @@ const messages = {
         distanceTitle: 'Distance',
         co2Title: 'CO₂',
         oneWayLegend: 'One-way:',
-        saveButton: '💾 Save all legs'
+        saveButton: '💾 Save all legs',
+        priceTitle: 'Cost (€)',
       },
       legLabel: 'Leg',
       history: {

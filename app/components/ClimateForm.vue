@@ -14,7 +14,7 @@ const defaultParis = { name: 'Paris, France', lat: '48.8566', lng: '2.3522', cou
 
 // Array of legs: each leg has from, to, mode
 const legs = ref([
-  { id: 1, from: defaultParis, to: null, mode: 'Avion' }
+  { id: 1, from: defaultParis, to: null, mode: 'Avion', price: null }
 ])
 
 // Global Aller-Retour toggle (applies to all computations)
@@ -90,9 +90,13 @@ const legMetrics = computed(() => {
     const rawCO2 = computeCO2(l, rawDist)
     const distance = rawDist ? (globalRoundTrip.value ? rawDist * 2 : rawDist) : null
     const co2 = rawCO2 ? (globalRoundTrip.value ? rawCO2 * 2 : rawCO2) : null
-    return { id: l.id, distance, co2, rawDist, rawCO2 }
+    const rawPrice = (l.price !== null && l.price !== '' && !Number.isNaN(Number(l.price))) ? Number(l.price) : null
+    const price = rawPrice != null ? (globalRoundTrip.value ? Math.round((rawPrice * 2) * 100) / 100 : Math.round(rawPrice * 100) / 100) : null
+    return { id: l.id, distance, co2, rawDist, rawCO2, price, rawPrice }
   })
 })
+
+const totalPrice = computed(() => legMetrics.value.reduce((sum, m) => sum + (m.price || 0), 0))
 
 const totalDistance = computed(() => legMetrics.value.reduce((sum, m) => sum + (m.distance || 0), 0))
 const totalCO2 = computed(() => legMetrics.value.reduce((sum, m) => sum + (m.co2 || 0), 0))
@@ -110,6 +114,7 @@ function addLeg() {
     from: (typeof last.to === 'object' && last.to) ? last.to : defaultParis,
     to: null,
     mode: last.mode
+    , price: null
   })
 }
 
@@ -134,12 +139,15 @@ async function saveAll() {
   for (const leg of legs.value) {
     const metrics = legMetrics.value.find(m => m.id === leg.id)
     if (!metrics?.distance || !metrics?.co2) continue
+    const rawPrice = (leg.price !== null && leg.price !== '' && !Number.isNaN(Number(leg.price))) ? Number(leg.price) : null
+    const priceToSave = rawPrice != null ? (globalRoundTrip.value ? Math.round((rawPrice * 2) * 100) / 100 : Math.round(rawPrice * 100) / 100) : null
     const result = await saveTravel({
       traveler: user.value?.data.id || '',
       departure: leg.from?.name || '',
       final: leg.to?.name || '',
       distanceKm: metrics.distance,
       co2EmissionKg: metrics.co2,
+      price: priceToSave,
       transport_mode: leg.mode + (globalRoundTrip.value ? ' (Aller-Retour)' : ''),
       tripUuid,
       allerRetour: globalRoundTrip.value
@@ -226,12 +234,12 @@ async function saveAll() {
             <select v-model="leg.mode" class="w-full border border-gray-300 rounded-md px-3 py-4.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option>Avion</option>
               <option>Train</option>
-              <option>RER</option>
+           <!--  <option>RER</option>
               <option>Métro</option>
               <option>Voiture</option>
               <option>Taxi</option>
               <option>Bus</option>
-              <option>Tramway</option>
+              <option>Tramway</option>--> 
             </select>
           </div>
           <div class="md:col-span-2">
@@ -242,7 +250,7 @@ async function saveAll() {
           </div>
           
         </div>
-        <div class="grid md:grid-cols-2 gap-6 mt-2">
+        <div class="grid md:grid-cols-3 gap-6 mt-2">
           <div class="border rounded-md p-3 bg-gray-50">
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.distanceTitle') }}</div>
             <div class="text-base font-semibold">{{ (legMetrics.find(m=>m.id===leg.id)?.distance) ?? '...' }} km</div>
@@ -252,6 +260,17 @@ async function saveAll() {
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.co2Title') }}</div>
             <div class="text-base font-semibold">{{ (legMetrics.find(m=>m.id===leg.id)?.co2) ?? '...' }} kg</div>
             <div v-if="globalRoundTrip && legMetrics.find(m=>m.id===leg.id)?.rawCO2" class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{ legMetrics.find(m=>m.id===leg.id)?.rawCO2 }} kg</div>
+          </div>
+          <div class="border rounded-md p-3 bg-gray-50">
+            <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.priceTitle') || 'Prix' }}</div>
+            <div class="text-base font-semibold">
+              <div v-if="leg.mode === 'Train'">
+                <input v-model.number="leg.price" type="number" min="0" step="0.01" placeholder="€" class="w-full border rounded px-2 py-1" />
+                <div v-if="leg.price" class="text-sm text-gray-600 mt-1">€{{ leg.price }}</div>
+              </div>
+              <div v-else class="text-sm text-gray-600">{{ leg.price ? '€' + leg.price : '—' }}</div>
+              <div v-if="globalRoundTrip && legMetrics.find(m=>m.id===leg.id)?.rawPrice" class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{ legMetrics.find(m=>m.id===leg.id)?.rawPrice }} €</div>
+            </div>
           </div>
         </div>
       </div>

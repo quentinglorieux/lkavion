@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
             _eq: userId
           }
         },
-        fields: 'distance,co2,transport_mode,departure,final'
+        fields: 'distance,co2,transport_mode,departure,final,price'
       },
       signal: controllerTravels.signal
     })

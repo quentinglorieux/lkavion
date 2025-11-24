@@ -41,6 +41,18 @@ const columns = [
     accessorKey: 'co2',
     header: 'CO₂ (kg)',
     cell: ({ row }) => `${row.getValue('co2')} kg`
+  },
+  {
+    accessorKey: 'price',
+    header: 'Prix (€)',
+    cell: ({ row }) => {
+      const mode = row.getValue('transport_mode')
+      const price = row.getValue('price')
+      if (mode === 'Train' && price != null && price !== '' && !Number.isNaN(Number(price))) {
+        return `€${Number(price).toFixed(2)}`
+      }
+      return '—'
+    }
   }
 ]
 </script>
