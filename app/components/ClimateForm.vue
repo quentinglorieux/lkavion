@@ -159,7 +159,7 @@ async function saveAll() {
   }
   saving.value = false
   if (successCount && !failCount) {
-    alert(`${successCount} liaison(s) sauvegardée(s) avec succès 🚀`)
+    alert(`${successCount} liaison(s) sauvegardée(s) avec succès`)
   } else if (successCount && failCount) {
     alert(`${successCount} sauvegardée(s), ${failCount} échec(s) ⚠️`)
   } else if (!successCount && failCount) {
@@ -266,13 +266,15 @@ async function saveAll() {
           <div class="border rounded-md p-3 bg-gray-50">
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.distanceTitle') }}</div>
             <div class="text-base font-semibold">{{(legMetrics.find(m => m.id === leg.id)?.distance) ?? '...'}} km</div>
-            <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawDist" class="text-[10px] text-gray-400">
+            <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawDist"
+              class="text-[10px] text-gray-400">
               {{ t('climateForm.actions.oneWayLegend') }} {{legMetrics.find(m => m.id === leg.id)?.rawDist}} km</div>
           </div>
           <div class="border rounded-md p-3 bg-gray-50">
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.co2Title') }}</div>
             <div class="text-base font-semibold">{{(legMetrics.find(m => m.id === leg.id)?.co2) ?? '...'}} kg</div>
-            <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawCO2" class="text-[10px] text-gray-400">
+            <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawCO2"
+              class="text-[10px] text-gray-400">
               {{ t('climateForm.actions.oneWayLegend') }} {{legMetrics.find(m => m.id === leg.id)?.rawCO2}} kg</div>
           </div>
           <div class="border rounded-md p-3 bg-gray-50">
@@ -286,7 +288,7 @@ async function saveAll() {
               <div v-else class="text-sm text-gray-600">{{ leg.price ? '€' + leg.price : '—' }}</div>
               <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawPrice"
                 class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{
-                  legMetrics.find(m => m.id === leg.id)?.rawPrice }} €</div>
+                  legMetrics.find(m => m.id === leg.id)?.rawPrice}} €</div>
             </div>
           </div>
         </div>

@@ -54,7 +54,7 @@ const recentTravels = computed(() => {
       </div>
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
         <span class="text-xs uppercase tracking-widest text-gray-400">{{ t('dashboard.cards.totalDistanceTitle')
-        }}</span>
+          }}</span>
         <strong class="mt-2 text-3xl">{{ totals.totalDistance }} km</strong>
         <span class="text-xs text-gray-500 mt-1">{{ t('dashboard.cards.avgDistancePrefix') }} {{ averageDistance }} {{
           t('dashboard.cards.kmPerTrip') }}</span>
@@ -77,10 +77,11 @@ const recentTravels = computed(() => {
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-semibold">{{ t('dashboard.sections.byModeTitle') }}</h2>
           <span class="text-xs text-gray-400">{{ summaryTableData.length }} {{ t('dashboard.sections.modeCountSuffix')
-          }}</span>
+            }}</span>
         </div>
         <TravelSummaryTable :data="summaryTableData" />
       </div>
+
 
       <div class="lg:col-span-2 bg-white border rounded-lg shadow-sm p-6 space-y-4">
         <div class="flex justify-between items-center">

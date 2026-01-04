@@ -8,10 +8,6 @@ const props = defineProps({
 
 const columns = [
   {
-    accessorKey: 'departure',
-    header: 'Départ'
-  },
-  {
     accessorKey: 'date_travel',
     header: 'Date',
     cell: ({ row }) => {
@@ -20,6 +16,10 @@ const columns = [
       const date = new Date(d)
       return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`
     }
+  },
+  {
+    accessorKey: 'departure',
+    header: 'Départ'
   },
   {
     accessorKey: 'final',
