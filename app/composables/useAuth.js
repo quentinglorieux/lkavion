@@ -8,11 +8,11 @@ export function useAuth() {
   const user = useState("user", () => null);
   const { directusFetch, base } = useDirectus()
 
-  const login = async (email, password) => {
+  const login = async (identifier, password) => {
     try {
       const res = await $fetch('/api/auth/login', {
         method: 'POST',
-        body: { email, password }
+        body: { identifier, password }
       })
       token.value = res.data.access_token
       refreshToken.value = res.data.refresh_token
@@ -25,7 +25,7 @@ export function useAuth() {
       console.error('Login error:', err)
       return {
         success: false,
-        message: err.statusMessage || err.data?.errors?.[0]?.message || 'Échec de connexion'
+        message: err.statusMessage || err.data?.errors?.[0]?.message || 'Echec de connexion'
       }
     }
   }

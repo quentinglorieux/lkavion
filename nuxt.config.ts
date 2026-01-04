@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
-  srcDir: 'app/', 
+  srcDir: 'app/',
 
   vite: {
     plugins: [
@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
-  
+
   modules: [
     '@nuxt/fonts',
     '@nuxt/icon',
@@ -22,6 +22,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     directusUrl: process.env.DIRECTUS_URL || 'http://localhost:8055',
+    directusApiToken: process.env.DIRECTUS_API_TOKEN,
     public: {
       directusUrl: process.env.DIRECTUS_URL || 'http://localhost:8055'
     }

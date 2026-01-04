@@ -9,7 +9,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const token = raw.replace('Bearer ', '')
-  const serviceToken = process.env.DIRECTUS_API_TOKEN
+  const config = useRuntimeConfig()
+  const serviceToken = config.directusApiToken || process.env.DIRECTUS_API_TOKEN
   if (!serviceToken) {
     console.error('Missing DIRECTUS_API_TOKEN environment variable')
     return sendError(event, createError({
@@ -20,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Step 1: Get user ID from /users/me
-    const base = process.env.DIRECTUS_URL || 'http://localhost:8055'
+    const base = config.directusUrl
     const controllerUser = new AbortController()
     const timerUser = setTimeout(() => controllerUser.abort(), 8000)
     const user = await $fetch(base + '/users/me', {

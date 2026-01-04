@@ -1,8 +1,9 @@
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const base = process.env.DIRECTUS_URL || 'http://localhost:8055'
+  const config = useRuntimeConfig()
+  const base = config.directusUrl
   const userToken = getHeader(event, 'authorization')
-  const serviceToken = process.env.DIRECTUS_API_TOKEN
+  const serviceToken = config.directusApiToken || process.env.DIRECTUS_API_TOKEN
 
   if (!userToken) {
     return sendError(event, createError({ statusCode: 401, statusMessage: 'Unauthorized' }))

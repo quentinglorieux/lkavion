@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: database-lkavion
+    environment:
+      POSTGRES_DB: directus
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: directus
+    volumes:
+      - ../../pgdata:/var/lib/postgresql/data # host folder → container folder
+    networks:
+      - lkavion_net
+    restart: always
+
+  directus:
+    image: directus/directus:11.14
+    container_name: directus-lkavion
+    ports:
+      - 8055:8055
+    env_file:
+      - ../../.env
+    depends_on:
+      - postgres
+    environment:
+      SECRET: ${SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+
+      DB_CLIENT: ${DB_CLIENT}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      AUTH_PROVIDERS: ldap,local
+      AUTH_LDAP_DRIVER: ldap
+      AUTH_DISABLE_DEFAULT: false
+      AUTH_LDAP_CLIENT_URL: ldaps://ldaps-j.lkb.upmc.fr:636
+      AUTH_LDAP_BIND_DN: ''
+      AUTH_LDAP_BIND_PASSWORD: ''
+      AUTH_LDAP_USER_DN: 'o=lkb'
+      AUTH_LDAP_USER_SCOPE: 'sub'
+      AUTH_LDAP_USER_ATTRIBUTE: 'mail'
+      AUTH_LDAP_MAIL_ATTRIBUTE: mail
+      AUTH_LDAP_FIRST_NAME_ATTRIBUTE: givenName
+      AUTH_LDAP_LAST_NAME_ATTRIBUTE: sn
+      AUTH_LDAP_DEFAULT_ROLE_ID: 5d55067c-6915-469c-8094-101bc5ea6e13
+      NODE_TLS_REJECT_UNAUTHORIZED: '0' # only if you must ignore certs
+
+    networks:
+      - lkavion_net
+    restart: always
+
+  lkavion:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: nuxt-lkavion
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../../.env
+    environment:
+      - NUXT_DIRECTUS_URL=http://directus:8055
+      - NUXT_PUBLIC_DIRECTUS_URL=http://localhost:8055
+    depends_on:
+      - directus
+    networks:
+      - lkavion_net
+    restart: always
+
+volumes:
+  pgdata:
+
+
+networks:
+  lkavion_net:
+    driver: bridge
