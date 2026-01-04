@@ -14,7 +14,7 @@ const defaultParis = { name: 'Paris, France', lat: '48.8566', lng: '2.3522', cou
 
 // Array of legs: each leg has from, to, mode
 const legs = ref([
-  { id: 1, from: defaultParis, to: null, mode: 'Avion', price: null }
+  { id: 1, from: defaultParis, to: null, mode: 'Avion', price: null, date_travel: new Date().toISOString().split('T')[0] }
 ])
 
 // Global Aller-Retour toggle (applies to all computations)
@@ -113,8 +113,9 @@ function addLeg() {
     id: legs.value.length + 1,
     from: (typeof last.to === 'object' && last.to) ? last.to : defaultParis,
     to: null,
-    mode: last.mode
-    , price: null
+    mode: last.mode,
+    price: null,
+    date_travel: last.date_travel || new Date().toISOString().split('T')[0]
   })
 }
 
@@ -150,7 +151,8 @@ async function saveAll() {
       price: priceToSave,
       transport_mode: leg.mode + (globalRoundTrip.value ? ' (Aller-Retour)' : ''),
       tripUuid,
-      allerRetour: globalRoundTrip.value
+      allerRetour: globalRoundTrip.value,
+      date_travel: leg.date_travel
     }, { silent: true })
     if (result.ok) successCount++
     else failCount++
@@ -185,12 +187,14 @@ async function saveAll() {
       <div class="bg-white shadow-md rounded-lg p-4 border text-center flex flex-col justify-center">
         <div class="text-sm text-gray-600 uppercase">{{ t('climateForm.totals.distanceTitle') }}</div>
         <div class="text-3xl mt-1 text-gray-700 italic">{{ totalDistance }} km</div>
-        <div v-if="globalRoundTrip && totalDistance" class="text-[11px] text-gray-400 mt-1">{{ t('climateForm.totals.oneWayPrefixDistance') }} {{ Math.round(totalDistance/2) }} km</div>
+        <div v-if="globalRoundTrip && totalDistance" class="text-[11px] text-gray-400 mt-1">{{
+          t('climateForm.totals.oneWayPrefixDistance') }} {{ Math.round(totalDistance / 2) }} km</div>
       </div>
       <div class="bg-white shadow-md rounded-lg p-4 border text-center flex flex-col justify-center">
         <div class="text-sm text-gray-600 uppercase">{{ t('climateForm.totals.co2Title') }}</div>
         <div class="text-3xl mt-1 text-gray-700 italic">{{ totalCO2 }} kg</div>
-        <div v-if="globalRoundTrip && totalCO2" class="text-[11px] text-gray-400 mt-1">{{ t('climateForm.totals.oneWayPrefixCO2') }} {{ Math.round(totalCO2/2) }} kg</div>
+        <div v-if="globalRoundTrip && totalCO2" class="text-[11px] text-gray-400 mt-1">{{
+          t('climateForm.totals.oneWayPrefixCO2') }} {{ Math.round(totalCO2 / 2) }} kg</div>
       </div>
       <div class="bg-white shadow-md rounded-lg p-4 border flex flex-col justify-center items-center gap-2">
         <label class="text-sm font-medium text-gray-700">{{ t('climateForm.roundTrip.label') }}</label>
@@ -214,13 +218,15 @@ async function saveAll() {
     <!-- Legs -->
     <div class="space-y-10">
       <div v-for="leg in legs" :key="leg.id" class="bg-white border border-blue-300 rounded-md shadow-sm p-6 relative">
-        <div class="absolute -top-4 left-4 bg-white text-blue-600 px-2 font-semibold border border-blue-300 rounded-full shadow text-sm">
+        <div
+          class="absolute -top-4 left-4 bg-white text-blue-600 px-2 font-semibold border border-blue-300 rounded-full shadow text-sm">
           {{ leg.id }}
         </div>
         <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
           <h3 class="text-lg font-semibold">{{ t('climateForm.legLabel') }} {{ leg.id }}</h3>
           <div class="flex items-center gap-3">
-            <button v-if="legs.length > 1" @click="removeLeg(leg.id)" class="text-xs text-red-600 hover:underline">{{ t('climateForm.history.remove') }}</button>
+            <button v-if="legs.length > 1" @click="removeLeg(leg.id)" class="text-xs text-red-600 hover:underline">{{
+              t('climateForm.history.remove') }}</button>
             <button v-if="leg.id === legs.length" @click="addLeg" :disabled="!canAddLeg"
               class="text-xs px-3 py-1 rounded-md border transition relative"
               :class="canAddLeg ? 'bg-indigo-50 border-indigo-300 hover:bg-indigo-100' : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'">
@@ -228,48 +234,59 @@ async function saveAll() {
             </button>
           </div>
         </div>
-        <div class="grid md:grid-cols-5 gap-6 mb-4">
+        <div class="grid md:grid-cols-9 gap-6 mb-4">
+          <div class="md:col-span-2">
+            <label class="block mb-1 text-sm font-medium text-gray-700">Date</label>
+            <input type="date" v-model="leg.date_travel"
+              class="w-full border border-gray-300 rounded-md px-3 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
           <div class="md:col-span-1">
             <label class="block mb-1 text-sm font-medium text-gray-700">{{ t('climateForm.history.modeLabel') }}</label>
-            <select v-model="leg.mode" class="w-full border border-gray-300 rounded-md px-3 py-4.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select v-model="leg.mode"
+              class="w-full border border-gray-300 rounded-md px-3 py-4.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option>Avion</option>
               <option>Train</option>
-           <!--  <option>RER</option>
+              <!--  <option>RER</option>
               <option>Métro</option>
               <option>Voiture</option>
               <option>Taxi</option>
               <option>Bus</option>
-              <option>Tramway</option>--> 
+              <option>Tramway</option>-->
             </select>
           </div>
-          <div class="md:col-span-2">
+          <div class="md:col-span-3">
             <CityAutocomplete size="lg" label="Départ *" v-model="leg.from" />
           </div>
-          <div class="md:col-span-2">
+          <div class="md:col-span-3">
             <CityAutocomplete size="lg" label="Arrivée *" v-model="leg.to" />
           </div>
-          
+
         </div>
         <div class="grid md:grid-cols-3 gap-6 mt-2">
           <div class="border rounded-md p-3 bg-gray-50">
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.distanceTitle') }}</div>
-            <div class="text-base font-semibold">{{ (legMetrics.find(m=>m.id===leg.id)?.distance) ?? '...' }} km</div>
-            <div v-if="globalRoundTrip && legMetrics.find(m=>m.id===leg.id)?.rawDist" class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{ legMetrics.find(m=>m.id===leg.id)?.rawDist }} km</div>
+            <div class="text-base font-semibold">{{(legMetrics.find(m => m.id === leg.id)?.distance) ?? '...'}} km</div>
+            <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawDist" class="text-[10px] text-gray-400">
+              {{ t('climateForm.actions.oneWayLegend') }} {{legMetrics.find(m => m.id === leg.id)?.rawDist}} km</div>
           </div>
           <div class="border rounded-md p-3 bg-gray-50">
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.co2Title') }}</div>
-            <div class="text-base font-semibold">{{ (legMetrics.find(m=>m.id===leg.id)?.co2) ?? '...' }} kg</div>
-            <div v-if="globalRoundTrip && legMetrics.find(m=>m.id===leg.id)?.rawCO2" class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{ legMetrics.find(m=>m.id===leg.id)?.rawCO2 }} kg</div>
+            <div class="text-base font-semibold">{{(legMetrics.find(m => m.id === leg.id)?.co2) ?? '...'}} kg</div>
+            <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawCO2" class="text-[10px] text-gray-400">
+              {{ t('climateForm.actions.oneWayLegend') }} {{legMetrics.find(m => m.id === leg.id)?.rawCO2}} kg</div>
           </div>
           <div class="border rounded-md p-3 bg-gray-50">
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.priceTitle') || 'Prix' }}</div>
             <div class="text-base font-semibold">
               <div v-if="leg.mode === 'Train'">
-                <input v-model.number="leg.price" type="number" min="0" step="0.01" placeholder="€" class="w-full border rounded px-2 py-1" />
+                <input v-model.number="leg.price" type="number" min="0" step="0.01" placeholder="€"
+                  class="w-full border rounded px-2 py-1" />
                 <div v-if="leg.price" class="text-sm text-gray-600 mt-1">€{{ leg.price }}</div>
               </div>
               <div v-else class="text-sm text-gray-600">{{ leg.price ? '€' + leg.price : '—' }}</div>
-              <div v-if="globalRoundTrip && legMetrics.find(m=>m.id===leg.id)?.rawPrice" class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{ legMetrics.find(m=>m.id===leg.id)?.rawPrice }} €</div>
+              <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawPrice"
+                class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{
+                  legMetrics.find(m => m.id === leg.id)?.rawPrice }} €</div>
             </div>
           </div>
         </div>
@@ -278,15 +295,16 @@ async function saveAll() {
 
     <!-- Save All Button -->
     <div class="flex justify-end mt-8" v-if="user">
-      <button
-        :disabled="!canSave || saving"
-        @click="saveAll"
+      <button :disabled="!canSave || saving" @click="saveAll"
         class="px-6 py-3 rounded-md shadow font-medium transition flex items-center gap-2"
-        :class="(canSave && !saving) ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
-      >
+        :class="(canSave && !saving) ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
         <span v-if="!saving">{{ t('climateForm.actions.saveButton') }} ({{ legs.length }})</span>
         <span v-else class="flex items-center gap-2">
-          <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+          <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
           Sauvegarde...
         </span>
       </button>

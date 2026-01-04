@@ -12,6 +12,16 @@ const columns = [
     header: 'Départ'
   },
   {
+    accessorKey: 'date_travel',
+    header: 'Date',
+    cell: ({ row }) => {
+      const d = row.getValue('date_travel')
+      if (!d) return '—'
+      const date = new Date(d)
+      return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`
+    }
+  },
+  {
     accessorKey: 'final',
     header: 'Arrivée'
   },
@@ -58,9 +68,5 @@ const columns = [
 </script>
 
 <template>
-  <UTable
-    :data="data"
-    :columns="columns"
-    class="max-w-5xl w-full"
-  />
+  <UTable :data="data" :columns="columns" class="max-w-5xl w-full" />
 </template>

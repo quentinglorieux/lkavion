@@ -1,4 +1,3 @@
-
 <script setup>
 import { computed } from 'vue'
 import { useAuth } from '@/composables/useAuth'
@@ -22,6 +21,17 @@ const totalTrainCost = computed(() => {
   const train = summaryTableData.value.find(r => r.transport_mode === 'Train')
   return train?.price ? Number(train.price) : 0
 })
+
+const recentTravels = computed(() => {
+  if (!travels.value) return []
+  return [...travels.value]
+    .sort((a, b) => {
+      const dateA = new Date(a.date_travel || a.date_created).getTime()
+      const dateB = new Date(b.date_travel || b.date_created).getTime()
+      return dateB - dateA
+    })
+    .slice(0, 10)
+})
 </script>
 
 <template>
@@ -32,7 +42,9 @@ const totalTrainCost = computed(() => {
       <p class="text-gray-600 text-sm">{{ t('dashboard.hero.subtitle') }}</p>
     </header>
 
-    <section v-if="pending" class="bg-white border border-dashed border-gray-300 rounded-lg p-6 text-center text-sm text-gray-500">{{ t('dashboard.loading') }}</section>
+    <section v-if="pending"
+      class="bg-white border border-dashed border-gray-300 rounded-lg p-6 text-center text-sm text-gray-500">{{
+        t('dashboard.loading') }}</section>
 
     <section v-else class="grid md:grid-cols-4 gap-4">
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
@@ -41,14 +53,17 @@ const totalTrainCost = computed(() => {
         <span class="text-xs text-gray-500 mt-1">{{ user?.data.first_name || t('dashboard.cards.selfFallback') }}</span>
       </div>
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
-        <span class="text-xs uppercase tracking-widest text-gray-400">{{ t('dashboard.cards.totalDistanceTitle') }}</span>
+        <span class="text-xs uppercase tracking-widest text-gray-400">{{ t('dashboard.cards.totalDistanceTitle')
+        }}</span>
         <strong class="mt-2 text-3xl">{{ totals.totalDistance }} km</strong>
-        <span class="text-xs text-gray-500 mt-1">{{ t('dashboard.cards.avgDistancePrefix') }} {{ averageDistance }} {{ t('dashboard.cards.kmPerTrip') }}</span>
+        <span class="text-xs text-gray-500 mt-1">{{ t('dashboard.cards.avgDistancePrefix') }} {{ averageDistance }} {{
+          t('dashboard.cards.kmPerTrip') }}</span>
       </div>
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
         <span class="text-xs uppercase tracking-widest text-gray-400">{{ t('dashboard.cards.totalCO2Title') }}</span>
         <strong class="mt-2 text-3xl">{{ totals.totalCO2 }} kg</strong>
-        <span class="text-xs text-gray-500 mt-1">{{ t('dashboard.cards.avgCO2Prefix') }} {{ averageCO2 }} {{ t('dashboard.cards.kgPerTrip') }}</span>
+        <span class="text-xs text-gray-500 mt-1">{{ t('dashboard.cards.avgCO2Prefix') }} {{ averageCO2 }} {{
+          t('dashboard.cards.kgPerTrip') }}</span>
       </div>
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
         <span class="text-xs uppercase tracking-widest text-gray-400">Coût total Train</span>
@@ -57,21 +72,22 @@ const totalTrainCost = computed(() => {
       </div>
     </section>
 
-    <section class="grid lg:grid-cols-2 gap-6">
-      <div class="bg-white border rounded-lg shadow-sm p-6 space-y-4">
+    <section class="grid lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-1 bg-white border rounded-lg shadow-sm p-6 space-y-4">
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-semibold">{{ t('dashboard.sections.byModeTitle') }}</h2>
-          <span class="text-xs text-gray-400">{{ summaryTableData.length }} {{ t('dashboard.sections.modeCountSuffix') }}</span>
+          <span class="text-xs text-gray-400">{{ summaryTableData.length }} {{ t('dashboard.sections.modeCountSuffix')
+          }}</span>
         </div>
         <TravelSummaryTable :data="summaryTableData" />
       </div>
 
-      <div class="bg-white border rounded-lg shadow-sm p-6 space-y-4">
+      <div class="lg:col-span-2 bg-white border rounded-lg shadow-sm p-6 space-y-4">
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-semibold">{{ t('dashboard.sections.historyTitle') }}</h2>
           <span class="text-xs text-gray-400">{{ tripCount }} {{ t('dashboard.sections.historySuffix') }}</span>
         </div>
-        <MyTravelHistoryTable :data="travels" />
+        <MyTravelHistoryTable :data="recentTravels" />
       </div>
     </section>
 
