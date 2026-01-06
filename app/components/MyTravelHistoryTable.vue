@@ -63,6 +63,16 @@ const columns = [
       }
       return '—'
     }
+  },
+  {
+    accessorKey: 'visitor',
+    header: 'Visiteur',
+    cell: ({ row }) => {
+      const isVisitor = row.getValue('visitor')
+      const name = row.original.visitor_name
+      if (!isVisitor) return ''
+      return name ? `${name}` : '👤'
+    }
   }
 ]
 </script>

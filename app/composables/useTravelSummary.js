@@ -11,7 +11,14 @@ export function useTravelSummary() {
     byMode: {}
   })
 
+  const visitorTotals = reactive({
+    totalDistance: 0,
+    totalCO2: 0,
+    byMode: {}
+  })
+
   const summaryTableData = ref([])
+  const visitorSummaryTableData = ref([])
 
   async function fetchSummary() {
     pending.value = true
@@ -29,7 +36,13 @@ export function useTravelSummary() {
       totals.totalDistance = 0
       totals.totalCO2 = 0
       totals.byMode = {}
+
+      visitorTotals.totalDistance = 0
+      visitorTotals.totalCO2 = 0
+      visitorTotals.byMode = {}
+
       summaryTableData.value = []
+      visitorSummaryTableData.value = []
 
       for (const trip of res) {
         const d = trip.distance || 0
@@ -37,20 +50,24 @@ export function useTravelSummary() {
         const m = trip.transport_mode || 'Autre'
         const pRaw = trip.price
         const p = (pRaw !== null && pRaw !== undefined && !Number.isNaN(Number(pRaw))) ? Number(pRaw) : 0
+        const isVisitor = trip.visitor === true
 
-        totals.totalDistance += d
-        totals.totalCO2 += c
+        // Target correct accumulation object
+        const targetTotals = isVisitor ? visitorTotals : totals
 
-        if (!totals.byMode[m]) {
-          totals.byMode[m] = { distance: 0, co2: 0, count: 0, price: 0 }
+        targetTotals.totalDistance += d
+        targetTotals.totalCO2 += c
+
+        if (!targetTotals.byMode[m]) {
+          targetTotals.byMode[m] = { distance: 0, co2: 0, count: 0, price: 0 }
         }
 
-        totals.byMode[m].distance += d
-        totals.byMode[m].co2 += c
-        totals.byMode[m].count++
-        // Aggregate price only where provided (e.g., Train). Other modes remain 0.
+        targetTotals.byMode[m].distance += d
+        targetTotals.byMode[m].co2 += c
+        targetTotals.byMode[m].count++
+
         if (p > 0) {
-          totals.byMode[m].price += p
+          targetTotals.byMode[m].price += p
         }
       }
 
@@ -61,6 +78,15 @@ export function useTravelSummary() {
         count: info.count,
         price: info.price
       }))
+
+      visitorSummaryTableData.value = Object.entries(visitorTotals.byMode).map(([mode, info]) => ({
+        transport_mode: mode,
+        distance: info.distance,
+        co2: info.co2,
+        count: info.count,
+        price: info.price
+      }))
+
     } catch (err) {
       console.error('Error loading travel summary:', err)
       error.value = err
@@ -72,7 +98,9 @@ export function useTravelSummary() {
   return {
     travels,
     totals,
+    visitorTotals,
     summaryTableData,
+    visitorSummaryTableData,
     fetchSummary,
     pending,
     error

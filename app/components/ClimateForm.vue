@@ -19,6 +19,25 @@ const legs = ref([
 
 // Global Aller-Retour toggle (applies to all computations)
 const globalRoundTrip = ref(false)
+const visitor = ref(false)
+const visitorName = ref('')
+
+watch(visitor, (isVisitor) => {
+  // Update first leg defaults if they match standard defaults
+  if (legs.value.length > 0) {
+    const firstLeg = legs.value[0]
+    if (isVisitor) {
+      // Switch to: From = ?, To = Paris
+      if (firstLeg.from?.name === defaultParis.name) firstLeg.from = null
+      if (!firstLeg.to) firstLeg.to = defaultParis
+    } else {
+      // Switch back: From = Paris, To = ?
+      if (firstLeg.to?.name === defaultParis.name) firstLeg.to = null
+      if (!firstLeg.from) firstLeg.from = defaultParis
+    }
+  }
+})
+
 
 // Distance + CO2 computation helpers (replicates logic from useTravelCalculator)
 function computeRawDistance(leg) {
@@ -152,7 +171,9 @@ async function saveAll() {
       transport_mode: leg.mode + (globalRoundTrip.value ? ' (Aller-Retour)' : ''),
       tripUuid,
       allerRetour: globalRoundTrip.value,
-      date_travel: leg.date_travel
+      date_travel: leg.date_travel,
+      visitor: visitor.value,
+      visitor_name: visitor.value ? visitorName.value : null
     }, { silent: true })
     if (result.ok) successCount++
     else failCount++
@@ -183,7 +204,7 @@ async function saveAll() {
     </div>
 
     <!-- Totals Panel -->
-    <div class="grid md:grid-cols-4 gap-6 items-stretch">
+    <div class="grid md:grid-cols-5 gap-6 items-stretch">
       <div class="bg-white shadow-md rounded-lg p-4 border text-center flex flex-col justify-center">
         <div class="text-sm text-gray-600 uppercase">{{ t('climateForm.totals.distanceTitle') }}</div>
         <div class="text-3xl mt-1 text-gray-700 italic">{{ totalDistance }} km</div>
@@ -205,6 +226,23 @@ async function saveAll() {
         </button>
         <p class="text-[11px] text-gray-500 text-center">{{ t('climateForm.roundTrip.hint') }}</p>
       </div>
+      <div class="bg-white shadow-md rounded-lg p-4 border flex flex-col justify-center items-center gap-2">
+        <label class="text-sm font-medium text-gray-700">Visiteur</label>
+        <button type="button" @click="visitor = !visitor"
+          class="px-4 py-2 rounded-md text-sm font-medium border transition"
+          :class="visitor ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-indigo-50 border-indigo-300 hover:bg-indigo-100'">
+          {{ visitor ? 'Oui' : 'Non' }}
+        </button>
+        <p class="text-[11px] text-gray-500 text-center">Invité par le labo ?</p>
+      </div>
+
+      <div v-if="visitor"
+        class="bg-indigo-50 shadow-md rounded-lg p-4 border border-indigo-200 flex flex-col justify-center gap-2">
+        <label class="text-xs font-semibold uppercase text-indigo-700">Nom du visiteur</label>
+        <input type="text" v-model="visitorName" placeholder="ex: Jean Dupont"
+          class="w-full text-sm border-gray-300 rounded-md p-1.5" />
+      </div>
+
       <div class="bg-white shadow-md rounded-lg p-4 border flex flex-col justify-center items-center gap-2 relative">
         <p class="text-xs text-gray-500 text-center">{{ t('climateForm.actions.addLegLabel') }}</p>
         <button type="button" @click="addLeg" :disabled="!canAddLeg"

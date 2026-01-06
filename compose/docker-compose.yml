@@ -19,6 +19,9 @@ services:
       - 8055:8055
     env_file:
       - ../../.env
+    volumes:
+      - ../../directus/uploads:/directus/uploads
+      - ../../directus/extensions:/directus/extensions
     depends_on:
       - postgres
     environment:

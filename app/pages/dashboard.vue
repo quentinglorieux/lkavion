@@ -6,7 +6,7 @@ import TravelSummaryTable from '@/components/TravelSummaryTable.vue'
 import MyTravelHistoryTable from '@/components/MyTravelHistoryTable.vue'
 import { useI18n } from '@/composables/useI18n'
 
-const { fetchSummary, travels, totals, summaryTableData, pending, error } = useTravelSummary()
+const { fetchSummary, travels, totals, visitorTotals, summaryTableData, visitorSummaryTableData, pending, error } = useTravelSummary()
 const { token, user } = useAuth()
 const { t } = useI18n()
 
@@ -14,13 +14,19 @@ if (token.value) {
   await useAsyncData('travelSummary', () => fetchSummary())
 }
 
-const tripCount = computed(() => travels.value.length)
-const averageDistance = computed(() => tripCount.value ? Math.round(totals.totalDistance / tripCount.value) : 0)
-const averageCO2 = computed(() => tripCount.value ? Math.round(totals.totalCO2 / tripCount.value) : 0)
+const myTripCount = computed(() => summaryTableData.value.reduce((sum, item) => sum + item.count, 0))
+const totalTripCount = computed(() => travels.value.length)
+
+const averageDistance = computed(() => myTripCount.value ? Math.round(totals.totalDistance / myTripCount.value) : 0)
+const averageCO2 = computed(() => myTripCount.value ? Math.round(totals.totalCO2 / myTripCount.value) : 0)
 const totalTrainCost = computed(() => {
   const train = summaryTableData.value.find(r => r.transport_mode === 'Train')
   return train?.price ? Number(train.price) : 0
 })
+
+const visitorTripCount = computed(() => visitorSummaryTableData.value.reduce((sum, item) => sum + item.count, 0))
+const visitorAverageDistance = computed(() => visitorTripCount.value ? Math.round(visitorTotals.totalDistance / visitorTripCount.value) : 0)
+const visitorAverageCO2 = computed(() => visitorTripCount.value ? Math.round(visitorTotals.totalCO2 / visitorTripCount.value) : 0)
 
 const recentTravels = computed(() => {
   if (!travels.value) return []
@@ -49,7 +55,7 @@ const recentTravels = computed(() => {
     <section v-else class="grid md:grid-cols-4 gap-4">
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
         <span class="text-xs uppercase tracking-widest text-gray-400">{{ t('dashboard.cards.totalTripsTitle') }}</span>
-        <strong class="mt-2 text-3xl">{{ tripCount }}</strong>
+        <strong class="mt-2 text-3xl">{{ myTripCount }}</strong>
         <span class="text-xs text-gray-500 mt-1">{{ user?.data.first_name || t('dashboard.cards.selfFallback') }}</span>
       </div>
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
@@ -86,9 +92,39 @@ const recentTravels = computed(() => {
       <div class="lg:col-span-2 bg-white border rounded-lg shadow-sm p-6 space-y-4">
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-semibold">{{ t('dashboard.sections.historyTitle') }}</h2>
-          <span class="text-xs text-gray-400">{{ tripCount }} {{ t('dashboard.sections.historySuffix') }}</span>
+          <span class="text-xs text-gray-400">{{ totalTripCount }} {{ t('dashboard.sections.historySuffix') }}</span>
         </div>
         <MyTravelHistoryTable :data="recentTravels" />
+      </div>
+    </section>
+
+    <!-- Visitor Section -->
+    <section v-if="visitorSummaryTableData.length > 0" class="space-y-6 pt-10 border-t">
+      <header>
+        <h2 class="text-2xl font-bold">Visiteurs</h2>
+        <p class="text-gray-600 text-sm">Récapitulatif des déplacements pour les visiteurs invités.</p>
+      </header>
+
+      <section class="grid md:grid-cols-4 gap-4">
+        <div class="bg-indigo-50 rounded-lg border border-indigo-100 shadow-sm p-5 flex flex-col">
+          <span class="text-xs uppercase tracking-widest text-indigo-400">Trajets Visiteurs</span>
+          <strong class="mt-2 text-3xl text-indigo-900">{{ visitorTripCount }}</strong>
+        </div>
+        <div class="bg-indigo-50 rounded-lg border border-indigo-100 shadow-sm p-5 flex flex-col">
+          <span class="text-xs uppercase tracking-widest text-indigo-400">{{ t('dashboard.cards.totalDistanceTitle') }}</span>
+          <strong class="mt-2 text-3xl text-indigo-900">{{ visitorTotals.totalDistance }} km</strong>
+          <span class="text-xs text-indigo-500 mt-1">Moy. {{ visitorAverageDistance }} km/trajet</span>
+        </div>
+        <div class="bg-indigo-50 rounded-lg border border-indigo-100 shadow-sm p-5 flex flex-col">
+          <span class="text-xs uppercase tracking-widest text-indigo-400">{{ t('dashboard.cards.totalCO2Title') }}</span>
+          <strong class="mt-2 text-3xl text-indigo-900">{{ visitorTotals.totalCO2 }} kg</strong>
+          <span class="text-xs text-indigo-500 mt-1">Moy. {{ visitorAverageCO2 }} kg/trajet</span>
+        </div>
+      </section>
+
+      <div class="bg-white border rounded-lg shadow-sm p-6 space-y-4 max-w-xl">
+        <h3 class="text-lg font-semibold">{{ t('dashboard.sections.byModeTitle') }} (Visiteurs)</h3>
+        <TravelSummaryTable :data="visitorSummaryTableData" />
       </div>
     </section>
 

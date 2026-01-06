@@ -12,7 +12,6 @@ function openLogin() {
 </script>
 
 <template>
-  {{ user }}
   <div class="max-w-5xl mx-auto px-6 py-10 space-y-10">
     <section class="space-y-4">
       <h1 class="text-3xl font-bold flex items-center gap-2">{{ t('home.title') }}</h1>
