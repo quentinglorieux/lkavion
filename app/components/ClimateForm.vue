@@ -102,16 +102,14 @@ function generateTripUuid() {
   })
 }
 
-// Reactive maps for metrics
+// Reactive maps for metrics - always calculate one-way values
 const legMetrics = computed(() => {
   return legs.value.map(l => {
-    const rawDist = computeRawDistance(l)
-    const rawCO2 = computeCO2(l, rawDist)
-    const distance = rawDist ? (globalRoundTrip.value ? rawDist * 2 : rawDist) : null
-    const co2 = rawCO2 ? (globalRoundTrip.value ? rawCO2 * 2 : rawCO2) : null
+    const distance = computeRawDistance(l)
+    const co2 = computeCO2(l, distance)
     const rawPrice = (l.price !== null && l.price !== '' && !Number.isNaN(Number(l.price))) ? Number(l.price) : null
-    const price = rawPrice != null ? (globalRoundTrip.value ? Math.round((rawPrice * 2) * 100) / 100 : Math.round(rawPrice * 100) / 100) : null
-    return { id: l.id, distance, co2, rawDist, rawCO2, price, rawPrice }
+    const price = rawPrice != null ? Math.round(rawPrice * 100) / 100 : null
+    return { id: l.id, distance, co2, price }
   })
 })
 
@@ -156,28 +154,55 @@ async function saveAll() {
   let successCount = 0
   let failCount = 0
   const tripUuid = generateTripUuid()
+
   for (const leg of legs.value) {
     const metrics = legMetrics.value.find(m => m.id === leg.id)
     if (!metrics?.distance || !metrics?.co2) continue
-    const rawPrice = (leg.price !== null && leg.price !== '' && !Number.isNaN(Number(leg.price))) ? Number(leg.price) : null
-    const priceToSave = rawPrice != null ? (globalRoundTrip.value ? Math.round((rawPrice * 2) * 100) / 100 : Math.round(rawPrice * 100) / 100) : null
-    const result = await saveTravel({
+
+    // Price handling: if round trip, split the entered price in half for each direction
+    const pricePerDirection = metrics.price != null && globalRoundTrip.value
+      ? Math.round((metrics.price / 2) * 100) / 100
+      : metrics.price
+
+    // Save outbound trip (A → B)
+    const outboundResult = await saveTravel({
       traveler: user.value?.data.id || '',
       departure: leg.from?.name || '',
       final: leg.to?.name || '',
       distanceKm: metrics.distance,
       co2EmissionKg: metrics.co2,
-      price: priceToSave,
-      transport_mode: leg.mode + (globalRoundTrip.value ? ' (Aller-Retour)' : ''),
+      price: pricePerDirection,
+      transport_mode: leg.mode,
       tripUuid,
-      allerRetour: globalRoundTrip.value,
       date_travel: leg.date_travel,
       visitor: visitor.value,
       visitor_name: visitor.value ? visitorName.value : null
     }, { silent: true })
-    if (result.ok) successCount++
+
+    if (outboundResult.ok) successCount++
     else failCount++
+
+    // If round trip, save return trip (B → A)
+    if (globalRoundTrip.value) {
+      const returnResult = await saveTravel({
+        traveler: user.value?.data.id || '',
+        departure: leg.to?.name || '',  // Swapped: destination becomes departure
+        final: leg.from?.name || '',    // Swapped: departure becomes destination
+        distanceKm: metrics.distance,   // Same one-way distance
+        co2EmissionKg: metrics.co2,     // Same one-way CO2
+        price: pricePerDirection,       // Same split price
+        transport_mode: leg.mode,
+        tripUuid,                       // Same trip UUID to group them
+        date_travel: leg.date_travel,
+        visitor: visitor.value,
+        visitor_name: visitor.value ? visitorName.value : null
+      }, { silent: true })
+
+      if (returnResult.ok) successCount++
+      else failCount++
+    }
   }
+
   saving.value = false
   if (successCount && !failCount) {
     alert(`${successCount} liaison(s) sauvegardée(s) avec succès`)
@@ -208,14 +233,10 @@ async function saveAll() {
       <div class="bg-white shadow-md rounded-lg p-4 border text-center flex flex-col justify-center">
         <div class="text-sm text-gray-600 uppercase">{{ t('climateForm.totals.distanceTitle') }}</div>
         <div class="text-3xl mt-1 text-gray-700 italic">{{ totalDistance }} km</div>
-        <div v-if="globalRoundTrip && totalDistance" class="text-[11px] text-gray-400 mt-1">{{
-          t('climateForm.totals.oneWayPrefixDistance') }} {{ Math.round(totalDistance / 2) }} km</div>
       </div>
       <div class="bg-white shadow-md rounded-lg p-4 border text-center flex flex-col justify-center">
         <div class="text-sm text-gray-600 uppercase">{{ t('climateForm.totals.co2Title') }}</div>
         <div class="text-3xl mt-1 text-gray-700 italic">{{ totalCO2 }} kg</div>
-        <div v-if="globalRoundTrip && totalCO2" class="text-[11px] text-gray-400 mt-1">{{
-          t('climateForm.totals.oneWayPrefixCO2') }} {{ Math.round(totalCO2 / 2) }} kg</div>
       </div>
       <div class="bg-white shadow-md rounded-lg p-4 border flex flex-col justify-center items-center gap-2">
         <label class="text-sm font-medium text-gray-700">{{ t('climateForm.roundTrip.label') }}</label>
@@ -225,6 +246,8 @@ async function saveAll() {
           {{ globalRoundTrip ? t('climateForm.roundTrip.yes') : t('climateForm.roundTrip.no') }}
         </button>
         <p class="text-[11px] text-gray-500 text-center">{{ t('climateForm.roundTrip.hint') }}</p>
+        <p v-if="globalRoundTrip" class="text-[10px] text-indigo-600 text-center font-semibold">💡 Saisir le prix TOTAL
+          aller-retour</p>
       </div>
       <div class="bg-white shadow-md rounded-lg p-4 border flex flex-col justify-center items-center gap-2">
         <label class="text-sm font-medium text-gray-700">Visiteur</label>
@@ -304,29 +327,20 @@ async function saveAll() {
           <div class="border rounded-md p-3 bg-gray-50">
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.distanceTitle') }}</div>
             <div class="text-base font-semibold">{{(legMetrics.find(m => m.id === leg.id)?.distance) ?? '...'}} km</div>
-            <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawDist"
-              class="text-[10px] text-gray-400">
-              {{ t('climateForm.actions.oneWayLegend') }} {{legMetrics.find(m => m.id === leg.id)?.rawDist}} km</div>
           </div>
           <div class="border rounded-md p-3 bg-gray-50">
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.co2Title') }}</div>
             <div class="text-base font-semibold">{{(legMetrics.find(m => m.id === leg.id)?.co2) ?? '...'}} kg</div>
-            <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawCO2"
-              class="text-[10px] text-gray-400">
-              {{ t('climateForm.actions.oneWayLegend') }} {{legMetrics.find(m => m.id === leg.id)?.rawCO2}} kg</div>
           </div>
           <div class="border rounded-md p-3 bg-gray-50">
             <div class="text-[11px] uppercase text-gray-500">{{ t('climateForm.actions.priceTitle') || 'Prix' }}</div>
             <div class="text-base font-semibold">
               <div v-if="leg.mode === 'Train'">
-                <input v-model.number="leg.price" type="number" min="0" step="0.01" placeholder="€"
-                  class="w-full border rounded px-2 py-1" />
+                <input v-model.number="leg.price" type="number" min="0" step="0.1"
+                  :placeholder="globalRoundTrip ? '€ TOTAL Price A/R' : '€'" class="w-full border rounded px-2 py-1" />
                 <div v-if="leg.price" class="text-sm text-gray-600 mt-1">€{{ leg.price }}</div>
               </div>
               <div v-else class="text-sm text-gray-600">{{ leg.price ? '€' + leg.price : '—' }}</div>
-              <div v-if="globalRoundTrip && legMetrics.find(m => m.id === leg.id)?.rawPrice"
-                class="text-[10px] text-gray-400">{{ t('climateForm.actions.oneWayLegend') }} {{
-                  legMetrics.find(m => m.id === leg.id)?.rawPrice}} €</div>
             </div>
           </div>
         </div>
@@ -338,7 +352,8 @@ async function saveAll() {
       <button :disabled="!canSave || saving" @click="saveAll"
         class="px-6 py-3 rounded-md shadow font-medium transition flex items-center gap-2"
         :class="(canSave && !saving) ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
-        <span v-if="!saving">{{ t('climateForm.actions.saveButton') }} ({{ legs.length }})</span>
+        <span v-if="!saving">{{ t('climateForm.actions.saveButton') }} ({{ globalRoundTrip ? legs.length * 2 :
+          legs.length }})</span>
         <span v-else class="flex items-center gap-2">
           <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
             viewBox="0 0 24 24">

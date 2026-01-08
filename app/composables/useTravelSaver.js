@@ -2,7 +2,7 @@ export function useTravelSaver() {
   const { token } = useAuth()
 
   // Save a single travel; optional options.silent to suppress alerts (batch mode)
-  async function saveTravel({ traveler, departure, final, transport_mode, distanceKm, co2EmissionKg, tripUuid, allerRetour, price, date_travel, visitor, visitor_name }, options = {}) {
+  async function saveTravel({ traveler, departure, final, transport_mode, distanceKm, co2EmissionKg, tripUuid, price, date_travel, visitor, visitor_name }, options = {}) {
     const silent = options.silent === true
     try {
       const body = {
@@ -24,9 +24,6 @@ export function useTravelSaver() {
       }
       if (tripUuid) {
         body.trip_uuid = tripUuid
-      }
-      if (typeof allerRetour === 'boolean') {
-        body.aller_retour = allerRetour
       }
 
       const { error } = await useFetch('/api/v1/travels', {
