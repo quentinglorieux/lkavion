@@ -12,7 +12,7 @@ const messages = {
     },
     home: {
       title: 'LKB Calculateur de CO2',
-      version: 'v4',
+      version: 'v1.4',
       description: "Bienvenue sur l'outil interne de calcul des distances et émissions carbone liées à vos déplacements professionnels. Utilisez le calculateur pour saisir chaque liaison et obtenir une estimation selon la méthodologie GES 1point5. Les données enregistrées alimentent ensuite votre tableau de bord personnel.",
       cards: {
         loginTitle: 'Se connecter',
