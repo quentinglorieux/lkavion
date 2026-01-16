@@ -26,15 +26,29 @@ export default defineEventHandler(async (event) => {
     // Sync password to Directus if login successful
     if (res?.data?.access_token) {
       try {
-        await $fetch(base + '/users/me', {
-          method: 'PATCH',
+        // 1. Get User ID using the new token
+        const meRes = await $fetch(base + '/users/me', {
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${res.data.access_token}`,
-            'Content-Type': 'application/json'
-          },
-          body: { password }
+            'Authorization': `Bearer ${res.data.access_token}`
+          }
         })
-        console.log('Password synced to Directus for:', identifier)
+        const userId = meRes?.data?.id
+
+        // 2. Update password using Admin Token (bypass user permissions)
+        if (userId && config.directusApiToken) {
+          await $fetch(base + `/users/${userId}`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${config.directusApiToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: { password }
+          })
+          console.log('Password synced to Directus for user:', userId)
+        } else {
+          console.warn('Skipping password sync: Admin token missing or User ID not found')
+        }
       } catch (syncErr) {
         console.error('Failed to sync password:', syncErr)
       }

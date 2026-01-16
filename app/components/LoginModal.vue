@@ -4,7 +4,8 @@
       <button @click="close" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-xl">×</button>
 
       <h2 class="text-xl font-semibold mb-4">Connexion</h2>
-
+      <!-- add a message to explain that the login is the LDAP so its your email @lkb.upmc.fr or lkb.ens.fr -->
+      <p class="text-sm text-gray-500 mb-4">{{ $i18n.t('auth.ldapInstructions') }}</p>
       <div class="space-y-4">
         <input v-model="identifier" type="text" placeholder="Email"
           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" />

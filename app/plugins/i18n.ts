@@ -8,11 +8,12 @@ const messages = {
       logout: 'Se déconnecter'
     },
     auth: {
-      greeting: 'Bonjour'
+      greeting: 'Bonjour',
+      ldapInstructions: 'Connexion via LDAP, utilisez votre email @lkb.upmc.fr ou @lkb.ens.fr'
     },
     home: {
       title: 'LKB Calculateur de CO2',
-      version: 'v1.4',
+      version: 'v1.5',
       description: "Bienvenue sur l'outil interne de calcul des distances et émissions carbone liées à vos déplacements professionnels. Utilisez le calculateur pour saisir chaque liaison et obtenir une estimation selon la méthodologie GES 1point5. Les données enregistrées alimentent ensuite votre tableau de bord personnel.",
       cards: {
         loginTitle: 'Se connecter',
@@ -60,6 +61,15 @@ const messages = {
       history: {
         remove: 'Retirer',
         modeLabel: 'Mode *'
+      },
+      successModal: {
+        titleSuccess: 'Sauvegarde réussie !',
+        titleError: 'Échec de la sauvegarde',
+        savedLabel: 'liaison(s) enregistrée(s).',
+        codeInstruction: 'Veuillez noter ce(s) code(s) pour votre formulaire administratif :',
+        legLabel: 'Liaison',
+        errorLabel: 'erreur(s) rencontrée(s).',
+        closeButton: 'Fermer'
       }
     },
     dashboard: {
@@ -99,11 +109,12 @@ const messages = {
       logout: 'Log out'
     },
     auth: {
-      greeting: 'Hello'
+      greeting: 'Hello',
+      ldapInstructions: 'Login via LDAP, use your email @lkb.upmc.fr or @lkb.ens.fr'
     },
     home: {
       title: 'LKB CO2 Calculator',
-      version: 'v1.4',
+      version: 'v1.5',
       description: 'Welcome to the internal tool used to estimate distances and carbon emissions for your business trips. Use the calculator to input each leg and get an estimate based on the GES 1point5 methodology. Saved data powers your personal dashboard.',
       cards: {
         loginTitle: 'Log in',
@@ -151,6 +162,15 @@ const messages = {
       history: {
         remove: 'Remove',
         modeLabel: 'Mode *'
+      },
+      successModal: {
+        titleSuccess: 'Save successful!',
+        titleError: 'Save failed',
+        savedLabel: 'leg(s) saved.',
+        codeInstruction: 'Please note these code(s) for your administrative form:',
+        legLabel: 'Leg',
+        errorLabel: 'error(s) encountered.',
+        closeButton: 'Close'
       }
     },
     dashboard: {

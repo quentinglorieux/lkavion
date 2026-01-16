@@ -1,5 +1,6 @@
 <script setup>
 import CityAutocomplete from '@/components/CityAutocomplete.vue'
+import SuccessModal from '@/components/SuccessModal.vue'
 import { useTravelSaver } from '@/composables/useTravelSaver'
 import { geodesicDistance } from '@/composables/useDistanceCalculator'
 import { useAuth } from '@/composables/useAuth'
@@ -27,13 +28,13 @@ watch(visitor, (isVisitor) => {
   if (legs.value.length > 0) {
     const firstLeg = legs.value[0]
     if (isVisitor) {
-      // Switch to: From = ?, To = Paris
-      if (firstLeg.from?.name === defaultParis.name) firstLeg.from = null
-      if (!firstLeg.to) firstLeg.to = defaultParis
+      // Force reset: From = ?, To = Paris
+      firstLeg.from = undefined
+      firstLeg.to = defaultParis
     } else {
-      // Switch back: From = Paris, To = ?
-      if (firstLeg.to?.name === defaultParis.name) firstLeg.to = null
-      if (!firstLeg.from) firstLeg.from = defaultParis
+      // Force reset: From = Paris, To = ?
+      firstLeg.from = defaultParis
+      firstLeg.to = undefined
     }
   }
 })
@@ -147,17 +148,26 @@ const canAddLeg = computed(() => {
 })
 
 const saving = ref(false)
+const showSuccess = ref(false)
+const saveSuccessCount = ref(0)
+const saveFailCount = ref(0)
+const successCodes = ref([])
 
 async function saveAll() {
   if (!user.value || saving.value) return
   saving.value = true
-  let successCount = 0
-  let failCount = 0
+  saveSuccessCount.value = 0
+  saveFailCount.value = 0
+  successCodes.value = []
+
   const tripUuid = generateTripUuid()
 
   for (const leg of legs.value) {
     const metrics = legMetrics.value.find(m => m.id === leg.id)
     if (!metrics?.distance || !metrics?.co2) continue
+
+    // Generate random 6-digit code for this leg
+    const legCode = Math.floor(100000 + Math.random() * 900000).toString()
 
     // Price handling: if round trip, split the entered price in half for each direction
     const pricePerDirection = metrics.price != null && globalRoundTrip.value
@@ -179,11 +189,12 @@ async function saveAll() {
       visitor_name: visitor.value ? visitorName.value : null
     }, { silent: true })
 
-    if (outboundResult.ok) successCount++
-    else failCount++
+    if (outboundResult.ok) saveSuccessCount.value++
+    else saveFailCount.value++
 
     // If round trip, save return trip (B → A)
-    if (globalRoundTrip.value) {
+    // Only save if both cities are present
+    if (globalRoundTrip.value && leg.from && leg.to) {
       const returnResult = await saveTravel({
         traveler: user.value?.data.id || '',
         departure: leg.to?.name || '',  // Swapped: destination becomes departure
@@ -198,26 +209,27 @@ async function saveAll() {
         visitor_name: visitor.value ? visitorName.value : null
       }, { silent: true })
 
-      if (returnResult.ok) successCount++
-      else failCount++
+      if (returnResult.ok) saveSuccessCount.value++
+      else saveFailCount.value++
+    }
+
+    // Capture code if at least one part saved successfully
+    if (outboundResult.ok || (globalRoundTrip.value && returnResult?.ok)) {
+      successCodes.value.push({ legId: leg.id, code: legCode })
     }
   }
 
   saving.value = false
-  if (successCount && !failCount) {
-    alert(`${successCount} liaison(s) sauvegardée(s) avec succès`)
-  } else if (successCount && failCount) {
-    alert(`${successCount} sauvegardée(s), ${failCount} échec(s) ⚠️`)
-  } else if (!successCount && failCount) {
-    alert(`Aucune liaison sauvegardée. ${failCount} échec(s) 😢`)
-  } else {
-    alert('Rien à sauvegarder.')
+  if (saveSuccessCount.value > 0 || saveFailCount.value > 0) {
+    showSuccess.value = true
   }
 }
 </script>
 
 <template>
   <div class="max-w-5xl mx-auto px-6 py-8 space-y-10">
+    <SuccessModal :show="showSuccess" :success-count="saveSuccessCount" :fail-count="saveFailCount"
+      :codes="successCodes" @close="showSuccess = false" />
 
     <!-- Info Box -->
     <div class="bg-gray-100 border border-gray-300 p-4 rounded-md flex items-start gap-4">
