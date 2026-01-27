@@ -35,7 +35,7 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      AUTH_PROVIDERS: ldap,local
+      AUTH_PROVIDERS: local,ldap
       AUTH_LDAP_DRIVER: ldap
       AUTH_DISABLE_DEFAULT: false
       AUTH_LDAP_CLIENT_URL: ldaps://ldaps-j.lkb.upmc.fr:636

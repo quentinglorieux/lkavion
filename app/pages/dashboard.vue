@@ -38,6 +38,21 @@ const recentTravels = computed(() => {
     })
     .slice(0, 10)
 })
+
+const co2Cost = computed(() => {
+  const tons = totals.totalCO2 / 1000
+  if (tons <= 1) return 0
+  if (tons <= 2) return (tons - 1) * 150
+  return 150 + (tons - 2) * 300
+})
+
+const visitorCo2Cost = computed(() => {
+  const tons = visitorTotals.totalCO2 / 1000
+  if (tons <= 1) return 0
+  if (tons <= 2) return (tons - 1) * 150
+  return 150 + (tons - 2) * 300
+})
+
 </script>
 
 <template>
@@ -52,7 +67,7 @@ const recentTravels = computed(() => {
       class="bg-white border border-dashed border-gray-300 rounded-lg p-6 text-center text-sm text-gray-500">{{
         t('dashboard.loading') }}</section>
 
-    <section v-else class="grid md:grid-cols-4 gap-4">
+    <section v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
         <span class="text-xs uppercase tracking-widest text-gray-400">{{ t('dashboard.cards.totalTripsTitle') }}</span>
         <strong class="mt-2 text-3xl">{{ myTripCount }}</strong>
@@ -67,9 +82,14 @@ const recentTravels = computed(() => {
       </div>
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
         <span class="text-xs uppercase tracking-widest text-gray-400">{{ t('dashboard.cards.totalCO2Title') }}</span>
-        <strong class="mt-2 text-3xl">{{ totals.totalCO2 }} kg</strong>
+        <strong class="mt-2 text-3xl text-red-600">{{ totals.totalCO2 }} kg</strong>
         <span class="text-xs text-gray-500 mt-1">{{ t('dashboard.cards.avgCO2Prefix') }} {{ averageCO2 }} {{
           t('dashboard.cards.kgPerTrip') }}</span>
+      </div>
+      <div class="bg-indigo-50 rounded-lg border border-indigo-100 shadow-sm p-5 flex flex-col">
+        <span class="text-xs uppercase tracking-widest text-indigo-400">{{ t('dashboard.cards.co2ContributionTitle') }}</span>
+        <strong class="mt-2 text-3xl text-indigo-900">€{{ co2Cost.toFixed(2) }}</strong>
+        <span class="text-xs text-indigo-500 mt-1">{{ t('dashboard.cards.co2ContributionRules') }}</span>
       </div>
       <div class="bg-white rounded-lg border shadow-sm p-5 flex flex-col">
         <span class="text-xs uppercase tracking-widest text-gray-400">Coût total Train</span>
@@ -105,7 +125,7 @@ const recentTravels = computed(() => {
         <p class="text-gray-600 text-sm">Récapitulatif des déplacements pour les visiteurs invités.</p>
       </header>
 
-      <section class="grid md:grid-cols-4 gap-4">
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-indigo-50 rounded-lg border border-indigo-100 shadow-sm p-5 flex flex-col">
           <span class="text-xs uppercase tracking-widest text-indigo-400">Trajets Visiteurs</span>
           <strong class="mt-2 text-3xl text-indigo-900">{{ visitorTripCount }}</strong>
@@ -119,6 +139,11 @@ const recentTravels = computed(() => {
           <span class="text-xs uppercase tracking-widest text-indigo-400">{{ t('dashboard.cards.totalCO2Title') }}</span>
           <strong class="mt-2 text-3xl text-indigo-900">{{ visitorTotals.totalCO2 }} kg</strong>
           <span class="text-xs text-indigo-500 mt-1">Moy. {{ visitorAverageCO2 }} kg/trajet</span>
+        </div>
+        <div class="bg-indigo-900 rounded-lg border shadow-sm p-5 flex flex-col">
+          <span class="text-xs uppercase tracking-widest text-indigo-300">{{ t('dashboard.cards.co2ContributionTitle') }} (Visiteurs)</span>
+          <strong class="mt-2 text-3xl text-white">€{{ visitorCo2Cost.toFixed(2) }}</strong>
+          <span class="text-xs text-indigo-200 mt-1">{{ t('dashboard.cards.co2ContributionRules') }}</span>
         </div>
       </section>
 

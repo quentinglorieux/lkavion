@@ -90,7 +90,9 @@ const messages = {
         avgCO2Prefix: 'moyenne',
         kgPerTrip: 'kg / liaison',
         modesTitle: 'Modes enregistrés',
-        modesHint: 'diversité de modes'
+        modesHint: 'diversité de modes',
+        co2ContributionTitle: 'Contribution CO2',
+        co2ContributionRules: 'Paliers : 1-2t : 150€, >2t : 300€'
       },
       sections: {
         byModeTitle: 'Répartition par mode',
@@ -191,7 +193,9 @@ const messages = {
         avgCO2Prefix: 'average',
         kgPerTrip: 'kg / trip',
         modesTitle: 'Recorded modes',
-        modesHint: 'mode variety'
+        modesHint: 'mode variety',
+        co2ContributionTitle: 'CO2 Contribution',
+        co2ContributionRules: 'Slices: 1-2t: 150€, >2t: 300€'
       },
       sections: {
         byModeTitle: 'Breakdown by mode',
