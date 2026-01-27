@@ -9,6 +9,8 @@ const { t } = useI18n()
 function openLogin() {
   loginModal.value = true
 }
+
+const { data: globalStats, pending } = useAsyncData('global-stats', () => $fetch('/api/travels/global-stats'))
 </script>
 
 <template>
@@ -63,6 +65,91 @@ function openLogin() {
             {{ t('home.cards.dashboardButton') }}
           </NuxtLink>
           <div v-else class="text-xs text-gray-500 text-center">{{ t('home.cards.dashboardGuard') }}</div>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="globalStats" class="pt-10 border-t border-gray-100 space-y-8">
+      <!-- Section 1: CO2 Contributions -->
+      <div
+        class="relative overflow-hidden bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl p-8 md:p-12 text-white shadow-xl">
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl"></div>
+        <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl"></div>
+
+        <div class="relative z-10 grid md:grid-cols-2 gap-10 items-center">
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold tracking-tight">{{ t('home.collective.title') }}</h2>
+            <p class="text-indigo-100/80 leading-relaxed text-sm">
+              {{ t('home.collective.description') }}
+            </p>
+            <div class="flex items-center gap-4 pt-2">
+              <div class="h-12 w-1 bg-indigo-400 rounded-full"></div>
+              <p class="text-sm font-medium text-indigo-200">
+                <span class="block text-white text-lg">{{ globalStats?.count }}</span>
+                {{ t('home.collective.tripsLabel') }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex justify-center md:justify-end">
+            <div
+              class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl flex flex-col items-center justify-center min-w-[240px]">
+              <span class="text-xs uppercase tracking-widest text-indigo-300 font-bold mb-2">{{
+                t('home.collective.contributionLabel') }}</span>
+              <div class="flex items-baseline gap-1">
+                <span class="text-5xl font-black text-white">€{{ globalStats?.totalContribution?.toLocaleString()
+                  }}</span>
+              </div>
+              <div
+                class="mt-4 px-3 py-1 bg-white/10 rounded-full text-[10px] text-indigo-200 uppercase tracking-tighter">
+                Calculé selon les paliers CO2
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Train Subsidy -->
+      <div
+        class="relative overflow-hidden bg-gradient-to-br from-emerald-900 to-teal-950 rounded-2xl p-8 md:p-12 text-white shadow-xl">
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl"></div>
+        <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-teal-500/20 rounded-full blur-3xl"></div>
+
+        <div class="relative z-10 grid md:grid-cols-2 gap-10 items-center">
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-emerald-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="text-emerald-400">
+                <rect width="16" height="16" x="4" y="4" rx="2" />
+                <path d="M9 20v2" />
+                <path d="M15 20v2" />
+                <path d="M12 4v16" />
+              </svg>
+              Soutien au train
+            </h2>
+            <p class="text-emerald-100/80 leading-relaxed text-sm">
+              Les contributions prélevées sur les trajets aériens sont directement réutilisées pour financer les
+              surcoûts
+              liés aux déplacements en train.
+            </p>
+          </div>
+
+          <div class="flex justify-center md:justify-end">
+            <div
+              class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl flex flex-col items-center justify-center min-w-[240px]">
+              <span class="text-xs uppercase tracking-widest text-emerald-300 font-bold mb-2">{{
+                t('home.collective.trainCostLabel') }}</span>
+              <div class="flex items-baseline gap-1">
+                <span class="text-5xl font-black text-white">€{{ globalStats?.totalTrainCost?.toLocaleString()
+                  }}</span>
+              </div>
+              <div
+                class="mt-4 px-3 py-1 bg-emerald-300/20 rounded-full text-[10px] text-emerald-100 uppercase tracking-tighter border border-emerald-400/30">
+                Total dépensé pour le train
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
