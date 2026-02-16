@@ -57,10 +57,17 @@ const visitorCo2Cost = computed(() => {
 
 <template>
   <div class="max-w-7xl mx-auto py-10 space-y-8 px-3  ">
-    <header class="space-y-2">
-      <p class="text-sm text-gray-500 uppercase tracking-wide">{{ t('dashboard.hero.label') }}</p>
-      <h1 class="text-3xl font-bold">{{ t('dashboard.hero.title') }}</h1>
-      <p class="text-gray-600 text-sm">{{ t('dashboard.hero.subtitle') }}</p>
+    <header class="flex justify-between items-start">
+      <div class="space-y-2">
+        <p class="text-sm text-gray-500 uppercase tracking-wide">{{ t('dashboard.hero.label') }}</p>
+        <h1 class="text-3xl font-bold">{{ t('dashboard.hero.title') }}</h1>
+        <p class="text-gray-600 text-sm">{{ t('dashboard.hero.subtitle') }}</p>
+      </div>
+      <div v-if="['35e06b60-fb46-4893-b19d-38c768a0b41c', 'd29315b3-f1bd-4c57-ba83-ee463ce8433d'].some(id => id === (typeof user?.data?.role === 'object' ? user?.data?.role?.id : user?.data?.role))">
+        <UButton to="/admin" color="indigo" variant="solid" icon="i-heroicons-shield-check">
+          Admin
+        </UButton>
+      </div>
     </header>
 
     <section v-if="pending"

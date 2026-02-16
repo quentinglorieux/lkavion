@@ -18,6 +18,9 @@ export default defineEventHandler(async (event) => {
       headers: {
         Authorization: `Bearer ${token}`
       },
+      params: {
+        fields: '*,role.*'
+      },
       signal: controller.signal
     })
     clearTimeout(timer)

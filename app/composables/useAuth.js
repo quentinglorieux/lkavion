@@ -30,6 +30,20 @@ export function useAuth() {
     }
   }
 
+  const checkUser = async () => {
+    if (token.value && !user.value) {
+      try {
+        const userRes = await $fetch('/api/auth/me', {
+          headers: { Authorization: `Bearer ${token.value}` }
+        })
+        user.value = userRes
+      } catch (err) {
+        console.error('Failed to restore session:', err)
+        logout()
+      }
+    }
+  }
+
   const logout = () => {
     token.value = null;
     user.value = null;
@@ -40,5 +54,6 @@ export function useAuth() {
     user,
     login,
     logout,
+    checkUser
   };
 }

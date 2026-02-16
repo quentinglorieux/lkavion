@@ -61,6 +61,10 @@ services:
     container_name: nuxt-lkavion
     ports:
       - "3000:3000"
+    volumes:
+      - ../:/app
+      - /app/node_modules
+      - /app/.nuxt
     env_file:
       - ../../.env
     environment:
