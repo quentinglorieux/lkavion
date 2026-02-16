@@ -51,38 +51,40 @@ const filteredTravels = computed(() => {
   })
 })
 
-// Debug data structure on the first load
-watchEffect(() => {
-  if (allTravels.value?.length > 0) {
-    console.log('Admin Travel Data Sample:', allTravels.value[0])
-  }
-})
 
 const columns = [
   {
     id: 'index',
-    key: 'index',
-    label: '#',
+    accessorKey: 'index',
+    header: '#',
     cell: ({ row }) => row.index + 1,
-    th: { base: 'w-12 text-center' },
-    td: { base: 'text-center text-gray-400' }
+    meta: {
+      class: {
+        th: 'min-w-[50px] text-center',
+        td: 'text-center text-gray-400'
+      }
+    }
   },
   {
     id: 'date_travel',
-    key: 'date_travel',
-    label: 'Date',
+    accessorKey: 'date_travel',
+    header: 'Date',
     cell: ({ row }) => {
       const d = row.original.date_travel
       if (!d) return '—'
       const date = new Date(d)
       return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
     },
-    th: { base: 'w-24' }
+    meta: {
+      class: {
+        th: 'min-w-[120px]'
+      }
+    }
   },
   {
     id: 'name',
-    key: 'name',
-    label: 'Voyageur',
+    accessorKey: 'name',
+    header: 'Voyageur',
     cell: ({ row }) => {
       const travel = row.original
       if (travel.visitor) return `[V] ${travel.visitor_name || 'Inconnu'}`
@@ -90,12 +92,17 @@ const columns = [
       const lastName = travel.traveler?.last_name || travel.last_name
       if (firstName || lastName) return `${firstName || ''} ${lastName || ''}`.trim()
       return '—'
+    },
+    meta: {
+      class: {
+        th: 'min-w-[200px]'
+      }
     }
   },
   {
     id: 'transport_mode',
-    key: 'transport_mode',
-    label: 'Mode',
+    accessorKey: 'transport_mode',
+    header: 'Mode',
     cell: ({ row }) => {
       const mode = row.original.transport_mode || row.original.type || '?'
       const icons = {
@@ -103,36 +110,50 @@ const columns = [
         Bus: '🚌', Taxi: '🚕', Tramway: '🚊', RER: '🚈'
       }
       return `${icons[mode] || '🚙'} ${mode}`
+    },
+    meta: {
+      class: {
+        th: 'min-w-[140px]'
+      }
     }
   },
   {
     id: 'itinerary',
-    key: 'itinerary',
-    label: 'Itinéraire',
+    accessorKey: 'itinerary',
+    header: 'Itinéraire',
     cell: ({ row }) => {
       const dep = row.original.departure || '?'
       const arr = row.original.final || '?'
       return `${dep} → ${arr}`
+    },
+    meta: {
+      class: {
+        th: 'min-w-[200px] w-full'
+      }
     }
   },
   {
     id: 'date_created',
-    key: 'date_created',
-    label: 'Ajouté le',
+    accessorKey: 'date_created',
+    header: 'Ajouté le',
     cell: ({ row }) => {
       const d = row.original.date_created
       if (!d) return '—'
       const date = new Date(d)
       return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
     },
-    th: { base: 'text-right' },
-    td: { base: 'text-right text-gray-400 font-mono text-xs' }
+    meta: {
+      class: {
+        th: 'text-right min-w-[100px]',
+        td: 'text-right text-gray-400 font-mono text-xs'
+      }
+    }
   }
 ]
 </script>
 
 <template>
-  <UContainer class="max-w-5xl mx-auto px-6 py-10 space-y-8">
+  <UContainer class="max-w-7xl mx-auto px-6 py-10 space-y-8"> 
     <!-- Clean Header -->
     <div class="flex items-center justify-between">
       <h1 class="text-3xl font-bold tracking-tight text-gray-900 font-display">Administration</h1>
@@ -176,11 +197,12 @@ const columns = [
       <div v-else class="relative overflow-x-auto">
         <UTable :data="filteredTravels"
                 :columns="columns"
-                class="w-full"
+                sticky
+                class="w-full min-w-full"
                 :ui="{ 
-                  th: { base: 'bg-gray-50/80 px-4 py-2 text-xs font-bold uppercase text-gray-900 tracking-wider border-b border-gray-200' },
-                  td: { base: 'px-4 py-2 text-sm text-gray-600 border-b border-gray-50/50' },
-                  tr: { base: 'odd:bg-white even:bg-gray-50/60 hover:bg-gray-100/40 transition-colors' }
+                  th: 'bg-gray-400/70 px-4 py-2 text-xs font-bold uppercase text-gray-900 tracking-wider border-b border-gray-200 text-left whitespace-nowrap',
+                  td: 'px-4 py-1.5 text-sm text-gray-700 border-b border-gray-200 last:border-0',
+                  tr: 'odd:bg-white even:bg-gray-300/40 hover:bg-blue-300/40 transition-colors'
                 }" />
                 
         <!-- Empty State -->
