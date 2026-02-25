@@ -3,7 +3,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useReparations } from '@/composables/useReparations'
 import { useDirectus } from '@/composables/useDirectus'
 
-const { user } = useAuth()
+const { user, token } = useAuth()
 const { base } = useDirectus()
 // Optional: Ensure only specific roles (e.g., admin) can access this page
 // if (user.value?.data?.role?.name !== 'Administrator') {
@@ -140,7 +140,7 @@ onMounted(() => {
         <template #quote-cell="{ row }">
           <UButton 
             v-if="row.original.quote"
-            :to="`${base}/assets/${row.original.quote}`"
+            :to="`/api/assets/${row.original.quote?.id || row.original.quote}`"
             target="_blank"
             icon="i-lucide-paperclip"
             color="gray"

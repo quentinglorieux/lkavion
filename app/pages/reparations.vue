@@ -35,8 +35,8 @@ const columns = computed(() => [
 ])
 
 const loadReparations = async () => {
-  if (user.value?.data?.id) {
-    myReparations.value = await fetchMyReparations(user.value.data.id)
+  if (user.value) {
+    myReparations.value = await fetchMyReparations()
   }
 }
 
@@ -255,7 +255,7 @@ onMounted(() => {
         <template #quote-cell="{ row }">
           <UButton 
             v-if="row.original.quote"
-            :to="`${base}/assets/${row.original.quote}`"
+            :to="`/api/assets/${row.original.quote?.id || row.original.quote}`"
             target="_blank"
             icon="i-lucide-paperclip"
             color="gray"
