@@ -22,6 +22,7 @@ const localeModel = computed({
         <NuxtLink to="/" class="hover:text-blue-600">{{ t('nav.home') }}</NuxtLink>
         <NuxtLink to="/calculator" class="hover:text-blue-600">{{ t('nav.calculator') }}</NuxtLink>
         <NuxtLink v-if="user" to="/dashboard" class="hover:text-blue-600">{{ t('nav.dashboard') }}</NuxtLink>
+        <NuxtLink v-if="user" to="/reparations" class="hover:text-blue-600">Réparations</NuxtLink>
       </nav>
       <div class="flex items-center gap-4">
         <select v-model="localeModel" class="text-sm border rounded-md px-2 py-1">

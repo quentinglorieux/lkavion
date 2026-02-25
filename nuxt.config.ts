@@ -12,6 +12,9 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
+  ui: {
+    colorMode: false
+  },
 
   modules: [
     '@nuxt/fonts',
@@ -26,5 +29,10 @@ export default defineNuxtConfig({
     public: {
       directusUrl: process.env.DIRECTUS_URL || 'http://localhost:8055'
     }
+  },
+
+  colorMode: {
+    preference: 'light',
+    fallback: 'light'
   }
 })

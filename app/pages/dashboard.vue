@@ -121,7 +121,7 @@ const visitorCo2Cost = computed(() => {
           <h2 class="text-lg font-semibold">{{ t('dashboard.sections.historyTitle') }}</h2>
           <span class="text-xs text-gray-400">{{ totalTripCount }} {{ t('dashboard.sections.historySuffix') }}</span>
         </div>
-        <MyTravelHistoryTable :data="recentTravels" />
+        <MyTravelHistoryTable :data="recentTravels" @refresh="fetchSummary" />
       </div>
     </section>
 

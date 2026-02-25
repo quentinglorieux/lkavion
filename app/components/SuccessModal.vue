@@ -46,6 +46,19 @@
                 <p v-if="failCount > 0" class="mt-2 text-sm text-red-600">
                     {{ failCount }} {{ $i18n.t('climateForm.successModal.errorLabel') }}
                 </p>
+
+                <!-- 24h Warning Note -->
+                <div v-if="successCount > 0" class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 text-left shadow-sm">
+                  <div class="text-amber-500 text-lg mt-0.5">💡</div>
+                  <div class="space-y-1">
+                    <p class="text-xs font-bold text-amber-900 uppercase tracking-tight">Rappel important</p>
+                    <p class="text-[11px] text-amber-800 leading-normal">
+                      Vous avez <strong>24 heures</strong> pour supprimer ce trajet depuis votre 
+                      <NuxtLink to="/dashboard" class="text-indigo-600 underline font-bold hover:text-indigo-800 transition-colors">espace personnel</NuxtLink> 
+                      en cas d'erreur. Passé ce délai, il sera définitivement enregistré.
+                    </p>
+                  </div>
+                </div>
             </div>
 
             <div class="mt-5 sm:mt-6">

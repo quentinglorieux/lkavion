@@ -12,16 +12,44 @@ export default defineEventHandler(async (event) => {
   try {
     console.log('Login attempt for identifier:', identifier)
 
-    const payload = { email: identifier, password }
-
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 8000)
-    const res = await $fetch(base + '/auth/login/ldap', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: { identifier, password }, // LDAP provider requires 'identifier'
-      signal: controller.signal
-    })
+    
+    let res
+    let loginError = null
+
+    // 1. Try LDAP login first
+    try {
+      res = await $fetch(base + '/auth/login/ldap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { identifier, password },
+        signal: controller.signal
+      })
+    } catch (ldapErr) {
+      console.warn('LDAP login failed, trying standard login...', ldapErr.response?.status)
+      loginError = ldapErr
+      
+      // 2. If LDAP fails (especially with 401 or 404), try standard Directus login
+      if (ldapErr.response?.status === 401 || ldapErr.response?.status === 404) {
+        try {
+          res = await $fetch(base + '/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: { email: identifier, password },
+            signal: controller.signal
+          })
+          loginError = null // Success!
+        } catch (stdErr) {
+          console.error('Standard login also failed:', stdErr.response?.status)
+          loginError = stdErr
+        }
+      }
+    }
+
+    if (loginError) {
+      throw loginError
+    }
 
     // Sync password to Directus if login successful
     if (res?.data?.access_token) {

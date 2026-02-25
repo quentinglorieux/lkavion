@@ -13,7 +13,7 @@ const messages = {
     },
     home: {
       title: 'LKB Calculateur de CO2',
-      version: '1.6',
+      version: 'v1.7',
       description: "Bienvenue sur l'outil interne de calcul des distances et émissions carbone liées à vos déplacements professionnels. Utilisez le calculateur pour saisir chaque liaison et obtenir une estimation selon la méthodologie GES 1point5. Les données enregistrées alimentent ensuite votre tableau de bord personnel.",
       cards: {
         loginTitle: 'Se connecter',
@@ -26,7 +26,11 @@ const messages = {
         dashboardTitle: 'Tableau de bord',
         dashboardBody: 'Visualisez l\'historique de vos déplacements et vos métriques agrégées.',
         dashboardButton: 'Voir le tableau de bord',
-        dashboardGuard: 'Connectez-vous pour accéder.'
+        dashboardGuard: 'Connectez-vous pour accéder.',
+        reparationsTitle: 'Réparations',
+        reparationsBody: 'Déclarez vos réparations d\'équipement pour accumuler des crédits d\'équipe.',
+        reparationsButton: 'Gérer les réparations',
+        reparationsGuard: 'Connectez-vous pour accéder.'
       },
       collective: {
         title: 'Impact Collectif LKB',
@@ -107,6 +111,64 @@ const messages = {
         historyTitle: 'Historique récent',
         historySuffix: 'entrées'
       }
+    },
+    reparations: {
+      title: 'Crédits Réparations',
+      description: 'Demande de prise en charge partielle des réparations. Déclarez les équipements que vous avez réparés et suivez vos demandes de crédit.',
+      backToDashboard: 'Retour au tableau de bord',
+      alert: {
+        title: 'Attention',
+        description: 'Une demande de remplacement de pièce d\'usure (diode de pompe, filtre de hotte, etc.) ne sera pas financée.'
+      },
+      form: {
+        title: 'Nouvelle demande de réparation',
+        subtitle: 'Remplissez ce formulaire pour chaque équipement réparé.',
+        instrument: {
+          label: 'Instrument/Equipement réparé',
+          placeholder: 'Ex: Oscilloscope Tektronix'
+        },
+        team: {
+          label: 'Équipe / Projet',
+          placeholder: 'Acronyme équipe ? (ex : 15B)'
+        },
+        company: {
+          label: 'Fournisseur d\'origine (Optionnel)',
+          placeholder: 'Ex: Thorlabs, Newport...'
+        },
+        price: {
+          label: 'Prix de la réparation (€)',
+          placeholder: 'Ex: 1500'
+        },
+        justification: {
+          label: 'Justification de la réparation',
+          placeholder: 'Décrivez la panne initiale et l\'action de réparation effectuée (composants changés, soudure refaite, etc.)'
+        },
+        quote: {
+          label: 'Devis ou facture (Optionnel)'
+        },
+        submit: 'Envoyer la demande'
+      },
+      history: {
+        title: 'Historique de vos demandes',
+        empty: 'Vous n\'avez pas encore soumis de demande de réparation.',
+        columns: {
+          instrument: 'Instrument',
+          company: 'Fournisseur',
+          team: 'Équipe',
+          price: 'Prix de la réparation (€)',
+          quote: 'Devis',
+          date: 'Date de demande',
+          actions: 'Actions'
+        },
+        viewQuote: 'Voir le devis/facture',
+        delete: 'Supprimer'
+      },
+      deleteModal: {
+        title: 'Confirmer la suppression',
+        description: 'Êtes-vous sûr de vouloir supprimer cette demande ?',
+        cancel: 'Annuler',
+        confirm: 'Supprimer'
+      }
     }
   },
   en: {
@@ -123,7 +185,7 @@ const messages = {
     },
     home: {
       title: 'LKB CO2 Calculator',
-      version: 'v1.6',
+      version: 'v1.7',
       description: 'Welcome to the internal tool used to estimate distances and carbon emissions for your business trips. Use the calculator to input each leg and get an estimate based on the GES 1point5 methodology. Saved data powers your personal dashboard.',
       cards: {
         loginTitle: 'Log in',
@@ -136,7 +198,11 @@ const messages = {
         dashboardTitle: 'Dashboard',
         dashboardBody: 'Review the history of your trips and aggregated metrics.',
         dashboardButton: 'View the dashboard',
-        dashboardGuard: 'Log in to access it.'
+        dashboardGuard: 'Log in to access it.',
+        reparationsTitle: 'Repairs',
+        reparationsBody: 'Declare your equipment repairs to accumulate team credits.',
+        reparationsButton: 'Manage repairs',
+        reparationsGuard: 'Log in to access it.'
       },
       collective: {
         title: 'LKB Collective Impact',
@@ -216,6 +282,64 @@ const messages = {
         modeCountSuffix: 'modes',
         historyTitle: 'Recent history',
         historySuffix: 'entries'
+      }
+    },
+    reparations: {
+      title: 'Repairs Credits',
+      description: 'Request partial funding for repairs. Declare equipment you have repaired and track your funding requests.',
+      backToDashboard: 'Back to dashboard',
+      alert: {
+        title: 'Warning',
+        description: 'A request for the replacement of a wear part (pump diode, hood filter, etc.) will not be funded.'
+      },
+      form: {
+        title: 'New repair request',
+        subtitle: 'Fill out this form for each repaired equipment.',
+        instrument: {
+          label: 'Repaired Instrument/Equipment',
+          placeholder: 'Ex: Tektronix Oscilloscope'
+        },
+        team: {
+          label: 'Team / Project',
+          placeholder: 'Team acronym (e.g., 15B)'
+        },
+        company: {
+          label: 'Original supplier (Optional)',
+          placeholder: 'Ex: Thorlabs, Newport...'
+        },
+        price: {
+          label: 'Repair cost (€)',
+          placeholder: 'Ex: 1500'
+        },
+        justification: {
+          label: 'Repair justification',
+          placeholder: 'Describe the initial breakdown and the repair action performed (changed components, redone soldering, etc.)'
+        },
+        quote: {
+          label: 'Quote or invoice (Optional)'
+        },
+        submit: 'Submit request'
+      },
+      history: {
+        title: 'History of your requests',
+        empty: 'You have not submitted a repair request yet.',
+        columns: {
+          instrument: 'Instrument',
+          company: 'Supplier',
+          team: 'Team',
+          price: 'Repair cost (€)',
+          quote: 'Quote',
+          date: 'Request date',
+          actions: 'Actions'
+        },
+        viewQuote: 'View quote/invoice',
+        delete: 'Delete'
+      },
+      deleteModal: {
+        title: 'Confirm deletion',
+        description: 'Are you sure you want to delete this request?',
+        cancel: 'Cancel',
+        confirm: 'Delete'
       }
     }
   }

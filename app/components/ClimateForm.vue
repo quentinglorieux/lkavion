@@ -360,7 +360,13 @@ async function saveAll() {
     </div>
 
     <!-- Save All Button -->
-    <div class="flex justify-end mt-8" v-if="user">
+    <div class="flex items-center justify-end mt-8 gap-6" v-if="user">
+      <div v-if="canSave" class="text-lg font-black flex items-center gap-2 animate-pulse transition-all duration-300" 
+           :class="globalRoundTrip ? 'text-indigo-600' : 'text-orange-600'">
+        <span></span>
+        <span>{{ globalRoundTrip ? '⚠️ (ALLER RETOUR)' : '(ALLER SIMPLE)' }}</span>
+      </div>
+
       <button :disabled="!canSave || saving" @click="saveAll"
         class="px-6 py-3 rounded-md shadow font-medium transition flex items-center gap-2"
         :class="(canSave && !saving) ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">

@@ -18,11 +18,11 @@ const { data: globalStats, pending } = useAsyncData('global-stats', () => $fetch
     <section class="space-y-4">
       <h1 class="text-3xl font-bold flex items-center gap-2">{{ t('home.title') }}</h1>
       <p class="text-gray-700 leading-relaxed text-sm">
-        {{ t('home.description') }}
+        {{ t('home.description') }} 
       </p>
     </section>
 
-    <section class="grid md:grid-cols-3 gap-6">
+    <section class="grid md:grid-cols-4 gap-6">
       <!-- Connexion Card -->
       <div class="border rounded-lg p-5 bg-white shadow-sm flex flex-col justify-between">
         <div>
@@ -65,6 +65,25 @@ const { data: globalStats, pending } = useAsyncData('global-stats', () => $fetch
             {{ t('home.cards.dashboardButton') }}
           </NuxtLink>
           <div v-else class="text-xs text-gray-500 text-center">{{ t('home.cards.dashboardGuard') }}</div>
+        </div>
+      </div>
+      
+      <!-- Reparations Card -->
+      <div class="border rounded-lg p-5 bg-white shadow-sm flex flex-col justify-between"
+        :class="!user ? 'opacity-50' : ''">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <UIcon name="i-lucide-wrench" class="text-blue-600 w-5 h-5" />
+            <h2 class="font-semibold text-lg">{{ t('home.cards.reparationsTitle') }}</h2>
+          </div>
+          <p class="text-xs text-gray-600">{{ t('home.cards.reparationsBody') }}</p>
+        </div>
+        <div class="mt-4">
+          <NuxtLink v-if="user" to="/reparations"
+            class="block w-full text-center px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
+            {{ t('home.cards.reparationsButton') }}
+          </NuxtLink>
+          <div v-else class="text-xs text-gray-500 text-center">{{ t('home.cards.reparationsGuard') }}</div>
         </div>
       </div>
     </section>

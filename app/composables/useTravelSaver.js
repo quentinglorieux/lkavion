@@ -1,7 +1,8 @@
 export function useTravelSaver() {
   const { token } = useAuth()
+  const toast = useToast()
 
-  // Save a single travel; optional options.silent to suppress alerts (batch mode)
+  // Save a single travel
   async function saveTravel({ traveler, departure, final, transport_mode, distanceKm, co2EmissionKg, tripUuid, price, date_travel, visitor, visitor_name }, options = {}) {
     const silent = options.silent === true
     try {
@@ -26,7 +27,7 @@ export function useTravelSaver() {
         body.trip_uuid = tripUuid
       }
 
-      const { error } = await useFetch('/api/v1/travels', {
+      const res = await $fetch('/api/v1/travels', {
         method: 'POST',
         body,
         headers: {
@@ -34,20 +35,65 @@ export function useTravelSaver() {
         }
       })
 
-      if (error.value) {
-        console.error('Erreur de sauvegarde:', error.value)
-        if (!silent) alert('Erreur lors de la sauvegarde')
-        return { ok: false, error: error.value }
-      } else {
-        if (!silent) alert('Déplacement sauvegardé avec succès')
-        return { ok: true }
+      if (!silent) {
+        toast.add({ title: 'Trajet enregistré', color: 'success' })
       }
+      return { ok: true, data: res }
     } catch (err) {
-      console.error('Erreur réseau ou fetch:', err)
-      if (!silent) alert('Échec de la requête')
+      console.error('Erreur de sauvegarde:', err)
+      if (!silent) {
+        toast.add({ 
+          title: 'Erreur lors de la sauvegarde', 
+          description: err.data?.message || err.message || 'Erreur inconnue',
+          color: 'error'
+        })
+      }
       return { ok: false, error: err }
     }
   }
 
-  return { saveTravel }
+  // Update an existing travel
+  async function updateTravel(id, data) {
+    try {
+      const res = await $fetch(`/api/v1/travels/${id}`, {
+        method: 'PATCH',
+        body: data,
+        headers: {
+          Authorization: `Bearer ${token.value}`
+        }
+      })
+      toast.add({ title: 'Trajet mis à jour', color: 'success' })
+      return { ok: true, data: res }
+    } catch (err) {
+      toast.add({ 
+        title: 'Erreur mise à jour', 
+        description: err.data?.message || err.message,
+        color: 'error' 
+      })
+      return { ok: false, error: err }
+    }
+  }
+
+  // Delete a travel
+  async function deleteTravel(id) {
+    try {
+      await $fetch(`/api/v1/travels/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token.value}`
+        }
+      })
+      toast.add({ title: 'Trajet supprimé', color: 'success' })
+      return { ok: true }
+    } catch (err) {
+      toast.add({ 
+        title: 'Erreur suppression', 
+        description: err.data?.message || err.message,
+        color: 'error' 
+      })
+      return { ok: false, error: err }
+    }
+  }
+
+  return { saveTravel, updateTravel, deleteTravel }
 }
