@@ -20,7 +20,8 @@ const state = reactive({
   company: '',
   team: '',
   justification: '',
-  price: undefined
+  price: undefined,
+  prix_neuf: undefined
 })
 const quoteFile = shallowRef(null)
 
@@ -29,6 +30,7 @@ const columns = computed(() => [
   { accessorKey: 'company', header: t('reparations.history.columns.company') },
   { accessorKey: 'team', header: t('reparations.history.columns.team') },
   { accessorKey: 'price', header: t('reparations.history.columns.price') },
+  { accessorKey: 'prix_neuf', header: t('reparations.history.columns.prix_neuf') },
   { id: 'quote', header: t('reparations.history.columns.quote') },
   { accessorKey: 'date_created', header: t('reparations.history.columns.date') },
   { id: 'actions' }
@@ -60,12 +62,16 @@ const submitForm = async () => {
     }
   }
 
+  const parsedPrice = Number(state.price)
+  const parsedPrixNeuf = state.prix_neuf === '' || state.prix_neuf == null ? null : Number(state.prix_neuf)
+
   const { ok } = await saveReparation({
     instrument: state.instrument,
     company: state.company,
     team: state.team,
     justification: state.justification,
-    price: state.price,
+    price: parsedPrice,
+    prix_neuf: Number.isNaN(parsedPrixNeuf) ? null : parsedPrixNeuf,
     quote: quoteId
   })
   
@@ -78,6 +84,7 @@ const submitForm = async () => {
     state.team = ''
     state.justification = ''
     state.price = undefined
+    state.prix_neuf = undefined
     quoteFile.value = null
     // Reset file input explicitly
     const fileInput = document.getElementById('quote-upload')
@@ -186,7 +193,13 @@ onMounted(() => {
           <UFormField :label="t('reparations.form.price.label')" required>
             <UInput v-model="state.price" type="number" min="0" :placeholder="t('reparations.form.price.placeholder')" icon="i-lucide-coins" 
             class="w-full sm:w-2/3"/>
-          </UFormField>     
+          </UFormField>
+
+          <UFormField :label="t('reparations.form.prix_neuf.label')">
+            <UInput v-model="state.prix_neuf" type="number" min="0" :placeholder="t('reparations.form.prix_neuf.placeholder')" icon="i-lucide-badge-euro"
+            class="w-full sm:w-2/3"/>
+          </UFormField>
+
           <UFormField :label="t('reparations.form.justification.label')" required>
           <UTextarea 
             v-model="state.justification" 
@@ -244,6 +257,13 @@ onMounted(() => {
           <span class="font-semibold text-emerald-600">
             €{{ Number(row.original.price).toFixed(2) }}
           </span>
+        </template>
+
+        <template #prix_neuf-cell="{ row }">
+          <span v-if="row.original.prix_neuf != null" class="font-semibold text-sky-700">
+            €{{ Number(row.original.prix_neuf).toFixed(2) }}
+          </span>
+          <span v-else class="text-gray-400 text-sm">—</span>
         </template>
         
         <!-- Custom Date Cell -->
@@ -306,7 +326,7 @@ onMounted(() => {
             <UButton
               color="error"
               :label="t('reparations.deleteModal.confirm')"
-              @click="handleRemove"
+              @click="doDelete"
               class="px-6 font-medium"
             />
           </div>

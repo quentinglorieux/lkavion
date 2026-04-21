@@ -139,6 +139,10 @@ const messages = {
           label: 'Prix de la réparation (€)',
           placeholder: 'Ex: 1500'
         },
+        prix_neuf: {
+          label: 'Prix estimé neuf (€) (Optionnel)',
+          placeholder: 'Ex: 4500'
+        },
         justification: {
           label: 'Justification de la réparation',
           placeholder: 'Décrivez la panne initiale et l\'action de réparation effectuée (composants changés, soudure refaite, etc.)'
@@ -156,6 +160,7 @@ const messages = {
           company: 'Fournisseur',
           team: 'Équipe',
           price: 'Prix de la réparation (€)',
+          prix_neuf: 'Prix estimé neuf (€)',
           quote: 'Devis',
           date: 'Date de demande',
           actions: 'Actions'
@@ -311,6 +316,10 @@ const messages = {
           label: 'Repair cost (€)',
           placeholder: 'Ex: 1500'
         },
+        prix_neuf: {
+          label: 'Estimated new price (€) (Optional)',
+          placeholder: 'Ex: 4500'
+        },
         justification: {
           label: 'Repair justification',
           placeholder: 'Describe the initial breakdown and the repair action performed (changed components, redone soldering, etc.)'
@@ -328,6 +337,7 @@ const messages = {
           company: 'Supplier',
           team: 'Team',
           price: 'Repair cost (€)',
+          prix_neuf: 'Estimated new price (€)',
           quote: 'Quote',
           date: 'Request date',
           actions: 'Actions'
